@@ -1,481 +1,2203 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>야자탈출 · Chapter 03</title>
-  <style>
-    :root { color-scheme: dark; --bg: #0e1b24; --panel: #172932; --line: #30434a; --muted: #9aafb5; --ink: #edf4e9; --mint: #c5e79d; --gold: #f2cb78; }
-    * { box-sizing: border-box; }
-    body { margin: 0; background: radial-gradient(ellipse at 45% 0, #223a43 0, var(--bg) 65%); color: var(--ink); font-family: "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif; }
-    button, a { -webkit-tap-highlight-color: transparent; }
-    button { font: inherit; cursor: pointer; }
-    button:focus-visible, a:focus-visible, canvas:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
-    button:disabled { cursor: default; opacity: .55; }
-    [hidden] { display: none !important; }
-    .shell { max-width: 1280px; margin: auto; padding: 30px 36px 20px; }
-    .topline { display: flex; align-items: center; justify-content: space-between; padding-bottom: 18px; border-bottom: 1px solid var(--line); font-size: 12px; letter-spacing: .16em; color: var(--muted); }
-    .brand { color: var(--mint); font-weight: 800; }
-    .topline a { color: var(--muted); text-decoration: none; letter-spacing: 0; }
-    .topline a:hover { color: var(--ink); }
-    .heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin: 26px 0 24px; }
-    .eyebrow { color: var(--mint); font-size: 11px; letter-spacing: .16em; font-weight: 700; }
-    h1 { font-size: clamp(28px, 4vw, 40px); letter-spacing: -.05em; margin: 4px 0 6px; }
-    .subtitle { color: var(--muted); font-size: 13px; margin: 0; line-height: 1.7; }
-    .header-actions { display: flex; align-items: center; gap: 16px; }
-    .timer { font-size: 29px; font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: .03em; }
-    .timer-label { display: block; font-size: 10px; font-weight: 500; color: var(--muted); letter-spacing: .12em; margin-bottom: 3px; }
-    .timer.urgent { color: #ffad95; }
-    .quiet { border: 1px solid #50636a; background: #1c3038; color: var(--ink); padding: 10px 15px; border-radius: 8px; }
-    .quiet:hover { background: #2a4149; }
-    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 234px; gap: 22px; align-items: start; }
-    .stage { position: relative; border: 1px solid #4a6065; border-radius: 12px; background: #14252d; overflow: hidden; box-shadow: 0 20px 50px #0004; }
-    .stage-bar { display: flex; justify-content: space-between; align-items: center; padding: 13px 17px; font-size: 11px; letter-spacing: .08em; background: #1a2e36; border-bottom: 1px solid #395057; }
-    .live-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--mint); margin-right: 7px; }
-    .floor { color: var(--muted); }
-    canvas { display: block; width: 100%; height: auto; aspect-ratio: 5 / 3; outline: none; }
-    .stage-note { min-height: 47px; display: flex; align-items: center; gap: 10px; padding: 10px 17px; background: #1a2e36; font-size: 12px; color: #c3d1d0; border-top: 1px solid #395057; }
-    .stage-note span:first-child { color: var(--mint); font-size: 10px; font-weight: 800; letter-spacing: .1em; }
-    .side-card { background: #172a32b3; border: 1px solid var(--line); padding: 20px; border-radius: 10px; margin-bottom: 14px; }
-    .side-card h2 { font-size: 14px; margin: 0 0 18px; }
-    .step { display: flex; gap: 10px; font-size: 12px; line-height: 1.7; margin-top: 15px; color: var(--muted); }
-    .step b { display: block; color: var(--ink); font-size: 12px; font-weight: 600; }
-    .step-number { flex-shrink: 0; border: 1px solid #4d6367; border-radius: 50%; width: 23px; height: 23px; text-align: center; color: var(--mint); font-size: 11px; }
-    .step.done .step-number { color: #172932; background: var(--mint); border-color: var(--mint); }
-    .legend { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 11px; margin: 13px 0; }
-    .swatch { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
-    .tip { color: var(--muted); font-size: 11px; line-height: 1.9; margin: 0; }
-    .status-line { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); padding-top: 15px; border-top: 1px solid var(--line); margin-top: 16px; }
-    #state-label { color: var(--mint); }
-    .controls { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; padding: 20px 2px; color: var(--muted); font-size: 11px; }
-    kbd { font: inherit; display: inline-block; min-width: 23px; text-align: center; padding: 4px 5px; background: #243840; color: #e5eee7; border: 1px solid #4b5e62; border-bottom-width: 2px; border-radius: 4px; margin-right: 3px; }
-    .footer { border-top: 1px solid var(--line); display: flex; justify-content: space-between; padding-top: 16px; font-size: 10px; letter-spacing: .06em; color: #8ba0a7; }
-    dialog { width: min(520px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto; padding: 34px; border: 1px solid #617773; border-radius: 16px; background: #182e35; color: var(--ink); box-shadow: 0 30px 100px #0008; }
-    dialog::backdrop { background: #08131ce6; backdrop-filter: blur(5px); }
-    dialog h2 { font-size: 30px; margin: 10px 0 13px; letter-spacing: -.04em; }
-    dialog p { font-size: 13px; line-height: 1.9; color: #b5c7c9; }
-    .dialog-icon { font-size: 34px; margin-bottom: 18px; }
-    .help-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; margin: 24px 0; font-size: 12px; color: #d0dddb; }
-    .primary { width: 100%; border: 0; border-radius: 8px; padding: 14px 18px; background: var(--mint); color: #203229; font-weight: 800; font-size: 14px; }
-    .primary:hover { background: #d7f2b8; }
-    .dialog-secondary { display: block; width: 100%; margin-top: 10px; }
-    .choice { display: block; width: 100%; background: #243b43; border: 1px solid #4b656c; color: var(--ink); text-align: left; margin: 9px 0; border-radius: 8px; padding: 14px 16px; font-size: 14px; }
-    .choice:hover { background: #304b52; border-color: var(--mint); }
-    #quiz-feedback { min-height: 26px; color: var(--gold); }
-    .small-note { font-size: 11px; color: var(--muted); text-align: center; margin-bottom: 0; }
-    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } .sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; } .side-card { margin: 0; } .legend-card { display: none; } }
-    @media (max-width: 560px) { .shell { padding: 20px 14px; } .heading { align-items: flex-start; gap: 10px; } .header-actions { gap: 10px; } .timer { font-size: 24px; } .header-actions .quiet { font-size: 11px; padding: 9px; } .subtitle { max-width: 205px; font-size: 11px; } .sidebar { grid-template-columns: 1fr; } .sidebar .side-card:last-child { display: none; } .topline { font-size: 10px; } dialog { padding: 26px; } .footer { gap: 15px; font-size: 9px; } }
-  </style>
-</head>
-<body>
-  <main class="shell">
-    <nav class="topline" aria-label="챕터 메뉴"><span class="brand">AFTER SCHOOL / 야자탈출</span><a href="main.html">메인으로 ↗</a></nav>
-    <header class="heading">
-      <div><span class="eyebrow">CHAPTER 03 · NIGHT ESCAPE</span><h1>야자탈출<span style="color:var(--mint)">.</span></h1><p class="subtitle">복도는 조용하게, 발걸음은 가볍게. 들키지 않고 출구까지!</p></div>
-      <div class="header-actions"><div id="timer" class="timer" role="timer" aria-label="남은 시간"><span class="timer-label">TIME LEFT</span><span id="time-value">01:30</span></div><button class="quiet" id="pause-button" type="button">Ⅱ 메뉴</button></div>
-    </header>
-    <div class="layout">
-      <section class="stage" aria-label="게임 화면">
-        <div class="stage-bar"><span><i class="live-dot"></i>학교 1층 · 연습 맵</span><span class="floor">NIGHT STUDY / 21:00</span></div>
-        <canvas id="game" width="1000" height="600" tabindex="0" aria-label="야자탈출 게임. WASD 또는 방향키로 이동, Shift 달리기, Space 점프, E 상호작용.">키보드와 Canvas를 지원하는 브라우저에서 실행해 주세요.</canvas>
-        <div class="stage-note" role="status"><span>GUIDE</span><span id="hint">시작 버튼을 눌러 연습을 시작하세요.</span></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>야자탈출 · Chapter 03</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #3d5546;
+        --muted: #81917f;
+        --line: #d7dfc9;
+        --paper: #fffcf2;
+        --green: #68866a;
+        --mint: #e5edce;
+        --gold: #f3db99;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #eef2e5;
+        color: var(--ink);
+        font-family:
+          "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+      }
+      button,
+      input {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      a {
+        color: inherit;
+      }
+      button:focus-visible,
+      a:focus-visible,
+      canvas:focus-visible,
+      input:focus-visible {
+        outline: 3px solid #deaa61;
+        outline-offset: 4px;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .shell {
+        max-width: 1240px;
+        margin: auto;
+        padding: 24px 32px;
+      }
+      .topline {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        padding-bottom: 17px;
+        border-bottom: 1px solid var(--line);
+      }
+      .brand {
+        font-weight: 900;
+        color: #68876d;
+      }
+      .topline a {
+        text-decoration: none;
+        color: #849078;
+      }
+      .heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 22px 0 20px;
+      }
+      .eyebrow {
+        font-size: 10px;
+        letter-spacing: 0.15em;
+        color: #8b9b77;
+        font-weight: 800;
+      }
+      h1 {
+        margin: 4px 0;
+        font-size: 34px;
+        letter-spacing: -0.05em;
+      }
+      .subtitle {
+        margin: 5px 0 0;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .quiet {
+        background: var(--paper);
+        border: 1px solid #bccbae;
+        border-bottom: 3px solid #bccbae;
+        border-radius: 9px;
+        color: #61795c;
+        padding: 10px 15px;
+        font-size: 12px;
+      }
+      .quiet:hover {
+        background: #fff;
+      }
+      .hud {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 17px 22px;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px #899d6d0a;
+      }
+      .hud-item {
+        font-size: 10px;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+      }
+      .hud-item b {
+        display: block;
+        font-size: 22px;
+        margin-top: 4px;
+        color: var(--ink);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.04em;
+      }
+      .hud-item #hearts {
+        color: #d88b86;
+        letter-spacing: 0.12em;
+      }
+      .passwords {
+        display: flex;
+        gap: 14px;
+      }
+      .passwords b {
+        font-size: 17px;
+        letter-spacing: 0.2em;
+      }
+      .hud-item .urgent {
+        color: #cb6d5d;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 208px;
+        gap: 18px;
+        align-items: start;
+      }
+      .stage {
+        border: 2px solid #b6c3a2;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #f4ecd6;
+        box-shadow: 0 8px 0 #a7b88e16;
+      }
+      .stage-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background: #e1e8d0;
+        border-bottom: 1px solid #b6c3a2;
+        font-size: 11px;
+      }
+      .stage-bar b {
+        font-size: 12px;
+      }
+      .stage-bar span {
+        color: #7b8a6e;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 25/16;
+        image-rendering: pixelated;
+        outline: none;
+      }
+      .stage-note {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 13px 16px;
+        min-height: 45px;
+        background: var(--paper);
+        font-size: 11px;
+        border-top: 1px solid #d2dbbd;
+      }
+      .stage-note > span:first-child {
+        color: #82956a;
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+      }
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #f8faed;
+        padding: 19px;
+        margin-bottom: 14px;
+      }
+      .card h2 {
+        font-size: 14px;
+        margin: 8px 0 17px;
+      }
+      .route-step {
+        font-size: 12px;
+        color: #93a085;
+        padding: 11px 0;
+        border-bottom: 1px dashed #d5dec6;
+      }
+      .route-step:last-child {
+        border: 0;
+      }
+      .route-step.active {
+        color: #486a4f;
+        font-weight: 800;
+      }
+      .route-step.done {
+        color: #a3b78f;
+      }
+      .route-step span {
+        font-size: 10px;
+        display: inline-block;
+        width: 26px;
+      }
+      .tip {
+        font-size: 11px;
+        color: var(--muted);
+        line-height: 1.9;
+      }
+      .meter {
+        height: 6px;
+        background: #e1e6d2;
+        border-radius: 5px;
+        overflow: hidden;
+        margin: 9px 0;
+      }
+      .meter > span {
+        display: block;
+        height: 100%;
+        background: #adbf85;
+        width: 100%;
+      }
+      .status-line {
+        font-size: 10px;
+        display: flex;
+        justify-content: space-between;
+        color: #90a07d;
+        margin-top: 14px;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 13px 21px;
+        font-size: 10px;
+        color: var(--muted);
+        padding: 18px 0;
+      }
+      kbd {
+        font: inherit;
+        padding: 3px 6px;
+        border: 1px solid #c5d0b5;
+        border-bottom-width: 2px;
+        border-radius: 4px;
+        background: #fbfcf5;
+        color: #657d5e;
+        margin-right: 3px;
+      }
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        border-top: 1px solid var(--line);
+        padding-top: 14px;
+        font-size: 10px;
+        color: #95a087;
+      }
+      dialog {
+        width: min(520px, calc(100% - 32px));
+        max-height: calc(100% - 32px);
+        overflow: auto;
+        border: 2px solid #bfcca9;
+        border-radius: 19px;
+        padding: 30px;
+        background: var(--paper);
+        color: var(--ink);
+        box-shadow: 0 20px 80px #40574144;
+      }
+      dialog::backdrop {
+        background: #324e458c;
+        backdrop-filter: blur(5px);
+      }
+      dialog h2 {
+        font-size: 29px;
+        letter-spacing: -0.04em;
+        margin: 10px 0 12px;
+      }
+      dialog p {
+        font-size: 13px;
+        line-height: 1.9;
+        color: #849079;
+      }
+      .primary {
+        display: block;
+        width: 100%;
+        padding: 14px 20px;
+        background: #e3ebc6;
+        border: 1px solid #a7bb84;
+        border-bottom: 4px solid #a7bb84;
+        border-radius: 10px;
+        color: #49643b;
+        font-weight: 800;
+        font-size: 14px;
+      }
+      .primary:hover {
+        background: #edf3d6;
+      }
+      .dialog-secondary {
+        display: block;
+        width: 100%;
+        margin-top: 10px;
+        text-align: center;
+        text-decoration: none;
+      }
+      .help-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        font-size: 11px;
+        margin: 24px 0;
+        color: #82916f;
+      }
+      .choice {
+        display: block;
+        width: 100%;
+        background: #f5f4e6;
+        border: 1px solid #d5daba;
+        border-radius: 8px;
+        padding: 13px 16px;
+        text-align: left;
+        margin: 8px 0;
+        color: #546c49;
+        font-size: 13px;
+      }
+      .choice:hover {
+        background: #eaf0d9;
+        border-color: #a5bc8e;
+      }
+      .feedback {
+        color: #b97864 !important;
+        min-height: 23px;
+      }
+      .small-note {
+        font-size: 10px !important;
+        text-align: center;
+      }
+      .sheet-control {
+        display: block;
+        font-size: 11px;
+        margin: 18px 0;
+        color: #7e8f6e;
+      }
+      .sheet-control input {
+        display: block;
+        font-size: 11px;
+        width: 100%;
+        margin-top: 9px;
+      }
+      .password-input {
+        display: block;
+        width: 100%;
+        border: 2px solid #c6d2af;
+        background: #fffef8;
+        padding: 13px;
+        letter-spacing: 0.5em;
+        text-align: center;
+        font-size: 26px;
+        color: #566c48;
+        border-radius: 10px;
+      }
+      .intro-art {
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        font-size: 42px;
+        background: linear-gradient(135deg, #e7edd4, #f9eccc);
+        border-radius: 12px;
+        margin-bottom: 22px;
+      }
+      .cross {
+        color: #cc8470;
+        font-size: 30px;
+        display: block;
+        text-align: center;
+      }
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          display: flex;
+          gap: 12px;
+        }
+        .card {
+          flex: 1;
+        }
+        .hud {
+          flex-wrap: wrap;
+        }
+        .shell {
+          padding: 20px;
+        }
+        .passwords {
+          gap: 12px;
+        }
+        .sidebar .card:last-child {
+          display: none;
+        }
+      }
+      @media (max-width: 560px) {
+        .shell {
+          padding: 16px 10px;
+        }
+        .hud {
+          padding: 13px;
+          gap: 12px;
+        }
+        .hud-item b {
+          font-size: 19px;
+        }
+        .passwords b {
+          font-size: 14px;
+        }
+        .heading {
+          gap: 12px;
+        }
+        h1 {
+          font-size: 29px;
+        }
+        .subtitle {
+          font-size: 10px;
+        }
+        .sidebar {
+          display: none;
+        }
+        dialog {
+          padding: 23px;
+        }
+        .footer {
+          gap: 14px;
+          font-size: 9px;
+        }
+      }
+      @media (min-width: 901px) and (max-height: 900px) {
+        .shell {
+          max-width: min(1240px, calc((100dvh - 330px) * 1.5625 + 274px));
+          padding: 12px 24px;
+        }
+        .topline {
+          padding-bottom: 10px;
+        }
+        .heading {
+          margin: 12px 0;
+        }
+        h1 {
+          font-size: 28px;
+        }
+        .subtitle {
+          font-size: 11px;
+        }
+        .hud {
+          padding: 10px 16px;
+          margin-bottom: 12px;
+        }
+        .hud-item b {
+          font-size: 20px;
+        }
+        .passwords b {
+          font-size: 15px;
+        }
+        .stage-bar {
+          padding: 10px 14px;
+        }
+        .controls {
+          padding: 12px 0;
+          gap: 9px 13px;
+          font-size: 9px;
+        }
+        .card {
+          padding: 16px;
+        }
+        .sidebar .card:nth-child(2),
+        .footer {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <nav class="topline">
+        <span class="brand">✿ SCHOOL ESCAPE / CHAPTER 03</span
+        ><a href="main.html#chapters">챕터 선택 ↗</a>
+      </nav>
+      <header class="heading">
+        <div>
+          <span class="eyebrow">AFTER THE LAST BELL</span>
+          <h1>야자탈출<span style="color: #b7c68a">.</span></h1>
+          <p class="subtitle">
+            8개의 과학 퀴즈, 두 번의 비밀번호. 마지막은 교문까지!
+          </p>
+        </div>
+        <button class="quiet" id="pause-button" type="button">Ⅱ 메뉴</button>
+      </header>
+      <section class="hud" aria-label="게임 진행 상황">
+        <div class="hud-item">
+          남은 시간<b id="time-value" role="timer">01:30</b>
+        </div>
+        <div class="hud-item">
+          남은 기회<b id="hearts" aria-label="하트 3개">♥♥♥</b>
+        </div>
+        <div class="hud-item">잡힌 횟수<b id="caught-count">0회</b></div>
+        <div class="passwords">
+          <div class="hud-item">2층 비밀번호<b id="code-2">? ? ? ?</b></div>
+          <div class="hud-item">1층 비밀번호<b id="code-1">? ? ? ?</b></div>
+        </div>
       </section>
-      <aside class="sidebar">
-        <section class="side-card"><span class="eyebrow">YOUR PLAN</span><h2 style="margin-top:9px">오늘의 탈출 루트</h2>
-          <div class="step" id="quiz-step"><span class="step-number">01</span><div><b>과학 퀴즈 풀기</b>복도 중앙의 단말기에서<br><kbd>E</kbd>를 눌러 확인</div></div>
-          <div class="step"><span class="step-number">02</span><div><b>선생님을 피해 출구로</b>빨간 감시 범위를 피해서<br>출구 앞에서 <kbd>E</kbd></div></div>
+      <div class="layout">
+        <section class="stage" aria-label="게임 화면">
+          <div class="stage-bar">
+            <b id="floor-label">2층 · 과학 퀴즈와 계단</b
+            ><span id="map-detail">퀴즈 0 / 4</span>
+          </div>
+          <canvas
+            id="game"
+            width="1000"
+            height="640"
+            tabindex="0"
+            aria-label="야자탈출 탑다운 게임. WASD 이동, Shift 달리기, Space 점프, E 상호작용."
+            >Canvas를 지원하는 브라우저를 사용해 주세요.</canvas
+          >
+          <div class="stage-note" role="status">
+            <span>GUIDE</span
+            ><span id="hint">시작 버튼을 누르면 90초 타이머가 시작됩니다.</span>
+          </div>
         </section>
-        <section class="side-card legend-card"><span class="eyebrow">MAP LEGEND</span><div class="legend"><i class="swatch" style="background:#c5e79d"></i>과학 퀴즈 · 출구</div><div class="legend"><i class="swatch" style="background:#ef9d83"></i>선생님 · 감시 범위</div><div class="legend"><i class="swatch" style="background:#7ca5b6"></i>나의 위치</div></section>
-        <section class="side-card"><p class="tip">점프 중에도 선생님에게 들킬 수 있어요. 메뉴나 퀴즈를 열면 시간과 순찰이 잠시 멈춰요.</p><div class="status-line"><span>캐릭터 상태</span><span id="state-label">IDLE</span></div></section>
-      </aside>
-    </div>
-    <div class="controls" aria-label="조작법"><span><kbd>WASD</kbd><kbd>↑↓←→</kbd> 이동</span><span><kbd>Shift</kbd> 달리기</span><span><kbd>Space</kbd> 점프</span><span><kbd>E</kbd> 상호작용</span><span>마우스 좌클릭 · 메뉴 / 선택</span></div>
-    <footer class="footer"><span>03 / 방과 후, 작은 탈출 연습</span><span>키보드 + 마우스 권장 · 임시 캐릭터 사용 중</span></footer>
-  </main>
-
-  <dialog id="menu-dialog" aria-labelledby="menu-title">
-    <div class="dialog-icon" aria-hidden="true">☾</div><span class="eyebrow">CHAPTER 03</span><h2 id="menu-title">오늘은, 야자탈출!</h2>
-    <p id="menu-description">90초 안에 과학 퀴즈를 풀고 출구에 도착하세요. 선생님의 빨간 감시 범위는 조심! 스토리 확정 전 기본 조작을 연습하는 맵입니다.</p>
-    <div class="help-grid"><span><kbd>WASD</kbd> / <kbd>방향키</kbd> 이동</span><span><kbd>Shift</kbd> + 이동 · 달리기</span><span><kbd>Space</kbd> 점프</span><span><kbd>E</kbd> 사물과 상호작용</span><span>마우스 좌클릭 · 선택</span><span><kbd>Esc</kbd> 메뉴 / 돌아가기</span></div>
-    <button class="primary" id="play-button" type="button">탈출 연습 시작 →</button><button class="quiet dialog-secondary" id="menu-restart" type="button" hidden>처음부터 다시 시작</button>
-    <p class="small-note">외부 이미지 없이 실행됩니다. 캐릭터는 추후 교체 예정이에요.</p>
-  </dialog>
-  <dialog id="quiz-dialog" aria-labelledby="quiz-title">
-    <span class="eyebrow">SCIENCE CHECK · 과학 퀴즈</span><h2 id="quiz-title">잠깐, 과학 한 문제!</h2><p id="quiz-question"></p><div id="quiz-choices"></div><p id="quiz-feedback" role="status"></p><button class="quiet dialog-secondary" id="quiz-close" type="button">나중에 풀기</button>
-  </dialog>
-  <dialog id="result-dialog" aria-labelledby="result-title">
-    <span class="eyebrow" id="result-caption">TRY AGAIN</span><h2 id="result-title"></h2><p id="result-description"></p><button class="primary" id="retry-button" type="button">다시 연습하기 →</button><a class="quiet dialog-secondary" href="main.html" style="text-align:center;text-decoration:none">메인으로</a>
-  </dialog>
-
-  <script>
-    'use strict';
-
-    // ── 1. 설정: 스토리 확정 후 시간, 맵 사물, 문제를 이곳에서 바꾸세요. ──
-    const CONFIG = Object.freeze({ width: 1000, height: 600, duration: 90,
-      walkSpeed: 135, runSpeed: 225, playerRadius: 15, jumpDuration: 0.65,
-      jumpHeight: 45, interactionDistance: 72, successDuration: 2, caughtDuration: 1 });
-    const STATES = Object.freeze({ IDLE: 'IDLE', MOVE: 'MOVE', JUMP: 'JUMP', CAUGHT: 'CAUGHT', QUIZ_SUCCESS: 'QUIZ_SUCCESS' });
-
-    // 1~5번 동작의 개별 프레임 이미지 경로를 순서대로 넣으세요. 빈 목록/로드 실패는 임시 그림 사용.
-    // 예: idle: ['assets/hachi/idle-1.png', 'assets/hachi/idle-2.png', ...]
-    // 안내 글자가 포함된 참고 이미지 전체가 아닌, 잘라낸 캐릭터 프레임을 사용하세요.
-    // moveRight는 오른쪽 원본. 왼쪽은 자동 반전. moveUp이 비면 정면 이미지로 대체합니다.
-    const CHARACTER_IMAGES = {
-      idle: [],              // ① 4프레임 반복
-      caught: [],            // ② 3프레임, 1회 재생 후 마지막 프레임 유지
-      jump: [],              // ③ 4프레임, 한 번의 점프에 1회 재생
-      moveRight: [], moveDown: [], moveUp: [], // ④ 각 4프레임 반복
-      quizSuccess: []        // ⑤ 정지 이미지 1장, 최대 2초
-    };
-    const QUIZZES = [{ id: 'science-1', question: '물은 보통 1기압에서 몇 °C에 끓을까요?',
-      answers: ['0°C', '50°C', '100°C'], correct: 2, explanation: '맞았어요! 물은 보통 1기압에서 100°C에 끓어요.' }];
-    const MAP = {
-      bounds: { left: 36, right: 964, top: 80, bottom: 568 },
-      spawn: { x: 110, y: 500 },
-      // 장애물은 캐릭터의 발 위치와 충돌합니다. 점프로 책상을 통과하지는 않습니다.
-      obstacles: [
-        { x: 87, y: 160, w: 110, h: 54 }, { x: 260, y: 160, w: 110, h: 54 },
-        { x: 87, y: 280, w: 110, h: 54 }, { x: 260, y: 280, w: 110, h: 54 },
-        { x: 87, y: 400, w: 110, h: 54 }, { x: 260, y: 400, w: 110, h: 54 },
-        { x: 463, y: 120, w: 74, h: 53 }
-      ],
-      objects: [
-        { id: 'science', type: 'quiz', x: 500, y: 187, label: '과학 퀴즈', quizId: 'science-1' },
-        { id: 'exit', type: 'exit', x: 915, y: 116, label: '출구' }
-      ],
-      teacher: { from: { x: 735, y: 255 }, to: { x: 735, y: 475 }, speed: 64, radius: 20, viewDistance: 145, viewAngle: Math.PI / 3 }
-    };
-
-    // ── 2. 게임 상태: 이미지 타이머가 직접 상태를 덮어쓰지 않도록 매 프레임 우선순위 판정. ──
-    const canvas = document.getElementById('game');
-    const ctx = canvas.getContext('2d');
-    const ui = Object.fromEntries(['hint', 'state-label', 'time-value', 'timer', 'quiz-step', 'menu-dialog', 'quiz-dialog', 'result-dialog'].map(id => [id, document.getElementById(id)]));
-    const keys = new Set();
-    const game = {
-      phase: 'ready', elapsed: 0, lastFrame: 0, quizSolved: false, activeQuiz: null,
-      player: { ...MAP.spawn, state: STATES.IDLE, stateSince: 0, facing: 'down', moving: false, running: false, jumpTime: null, successUntil: 0 },
-      teacher: { ...MAP.teacher.from, direction: 1, angle: Math.PI / 2 },
-      caughtAt: 0, message: '', messageUntil: 0
-    };
-    const imageSets = {};
-    for (const [name, paths] of Object.entries(CHARACTER_IMAGES)) {
-      imageSets[name] = paths.map(path => {
-        const image = new Image();
-        // 로드 실패 시 그리기 단계에서 임시 캐릭터로 대체합니다.
-        image.onerror = () => { image.dataset.failed = 'true'; };
-        image.src = path;
-        return image;
+        <aside class="sidebar">
+          <section class="card">
+            <span class="eyebrow">ESCAPE ROUTE</span>
+            <h2>오늘의 탈출 경로</h2>
+            <div class="route-step active" id="route-2">
+              <span>01</span>2층 · 네 자리 모으기
+            </div>
+            <div class="route-step" id="route-1">
+              <span>02</span>1층 · 정문 열기
+            </div>
+            <div class="route-step" id="route-yard">
+              <span>03</span>운동장 · 선생님 피하기
+            </div>
+            <div class="route-step"><span>04</span>교문 · 탈출!</div>
+          </section>
+          <section class="card">
+            <span class="eyebrow">A LITTLE HELP</span>
+            <p class="tip">
+              문 가까이에서 E를 누르세요. 정답을 맞히면 문이 열려요. 운동장 진입
+              5초 뒤 선생님이 순찰을 시작해요.
+            </p>
+            <p class="tip">
+              낮은 벤치는 점프로 넘을 수 있지만 벽과 울타리는 통과할 수 없어요.
+            </p>
+          </section>
+          <section class="card">
+            <span class="eyebrow">SPRINT ENERGY</span>
+            <div
+              class="meter"
+              role="meter"
+              aria-label="달리기 에너지"
+              aria-valuemin="0"
+              aria-valuemax="3"
+              aria-valuenow="3"
+              id="stamina-meter"
+            >
+              <span id="stamina-bar"></span>
+            </div>
+            <p class="tip">잠깐 달리고, 쉬면서 충전!</p>
+            <div class="status-line">
+              <span>플레이어</span><span id="state-label">IDLE</span>
+            </div>
+            <div class="status-line">
+              <span>선생님</span><span id="ai-label">대기</span>
+            </div>
+          </section>
+        </aside>
+      </div>
+      <div class="controls">
+        <span><kbd>WASD</kbd><kbd>↑↓←→</kbd> 이동</span
+        ><span><kbd>Shift</kbd> 달리기</span><span><kbd>Space</kbd> 점프</span
+        ><span><kbd>E</kbd> 상호작용</span><span><kbd>Esc</kbd> 메뉴</span
+        ><span>마우스 좌클릭 · 답안 / 버튼</span>
+      </div>
+      <footer class="footer">
+        <span>2F → 1F → PLAYGROUND → SCHOOL GATE</span
+        ><span id="asset-status"
+          >임시 캐릭터 · 메뉴에서 이미지 시트를 적용할 수 있어요</span
+        >
+      </footer>
+    </main>
+    <dialog id="menu-dialog" aria-labelledby="menu-title">
+      <div class="intro-art" aria-hidden="true">☾　🏫　✧</div>
+      <span class="eyebrow">CHAPTER 03</span>
+      <h2 id="menu-title">야자탈출</h2>
+      <p id="menu-description">
+        90초 안에 두 층의 과학 퀴즈를 풀고 교문으로 탈출하세요. 퀴즈와 비밀번호
+        창에서도 시간은 계속 흘러요. 메뉴에서는 일시정지됩니다.
+      </p>
+      <div class="help-grid">
+        <span><kbd>WASD</kbd> / 방향키 · 이동</span
+        ><span><kbd>Shift</kbd> + 이동 · 달리기</span
+        ><span><kbd>Space</kbd> 점프 / 낮은 벤치 넘기</span
+        ><span><kbd>E</kbd> 문 · 계단 · 퀴즈 · 출구</span
+        ><span>마우스 좌클릭 · 답안 선택</span
+        ><span><kbd>Esc</kbd> 메뉴 / 돌아가기</span>
+      </div>
+      <button class="primary" id="play-button" type="button">게임 시작 →</button
+      ><button
+        class="quiet dialog-secondary"
+        id="menu-restart"
+        type="button"
+        hidden
+      >
+        처음부터 다시 시작</button
+      ><a class="quiet dialog-secondary" href="main.html#chapters"
+        >챕터 선택으로 돌아가기</a
+      ><label class="sheet-control"
+        >캐릭터 동작 시트 불러오기 (제공한 전체 시트)<input
+          id="sheet-file"
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+      /></label>
+      <p id="sheet-feedback" class="small-note" role="status">
+        이미지가 없어도 모든 조작을 사용할 수 있어요.
+      </p>
+    </dialog>
+    <dialog id="quiz-dialog" aria-labelledby="quiz-title">
+      <span class="eyebrow" id="quiz-number"></span>
+      <h2 id="quiz-title"></h2>
+      <p id="quiz-question"></p>
+      <div id="quiz-choices"></div>
+      <p class="feedback" id="quiz-feedback" role="status"></p>
+      <button class="primary" id="quiz-retry" type="button" hidden>
+        다시 풀기</button
+      ><button class="quiet dialog-secondary" id="quiz-close" type="button">
+        나중에 풀기
+      </button>
+    </dialog>
+    <dialog id="password-dialog" aria-labelledby="password-title">
+      <span class="eyebrow">PASSWORD CHECK</span>
+      <h2 id="password-title"></h2>
+      <p>방에서 얻은 숫자를 첫 번째부터 네 번째 순서로 입력하세요.</p>
+      <form id="password-form">
+        <label for="password-input" class="eyebrow">네 자리 비밀번호</label
+        ><input
+          class="password-input"
+          id="password-input"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]{4}"
+          maxlength="4"
+          autocomplete="off"
+          aria-describedby="password-feedback"
+          required
+        />
+        <p id="password-feedback" class="feedback" role="status"></p>
+        <button class="primary" type="submit">확인 →</button>
+      </form>
+      <button class="quiet dialog-secondary" id="password-close" type="button">
+        돌아가기
+      </button>
+    </dialog>
+    <dialog id="result-dialog" aria-labelledby="result-title">
+      <span class="eyebrow" id="result-caption"></span>
+      <h2 id="result-title"></h2>
+      <p id="result-description"></p>
+      <button class="primary" id="retry-button" type="button">재도전 →</button
+      ><a class="quiet dialog-secondary" href="main.html#chapters"
+        >챕터 선택으로 돌아가기</a
+      >
+    </dialog>
+    <script>
+      "use strict";
+      // ── 1. 변경하기 쉬운 게임/이미지 설정 ──
+      const CONFIG = Object.freeze({
+        width: 1000,
+        height: 640,
+        duration: 90,
+        walkSpeed: 190,
+        runSpeed: 285,
+        playerRadius: 13,
+        teacherRadius: 17,
+        jumpDuration: 0.65,
+        jumpHeight: 40,
+        interactionDistance: 63,
+        successDuration: 2,
+        caughtDuration: 2,
+        invincibleDuration: 3,
+        staminaMax: 3,
+        detectionRadius: 160,
       });
-    }
-    const controlKeys = new Set(['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight', 'ShiftLeft', 'ShiftRight', 'Space', 'KeyE']);
-    const movementKeys = new Set(['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight']);
-    function setState(state, now) {
-      if (game.player.state !== state) { game.player.state = state; game.player.stateSince = now; }
-    }
-    function clearInput() { keys.clear(); game.player.moving = false; game.player.running = false; }
-    function resolveState(now) {
-      const p = game.player;
-      if (game.phase === 'caught' || game.phase === 'failed') return setState(STATES.CAUGHT, now);
-      if (p.jumpTime !== null) return setState(STATES.JUMP, now);
-      if (p.moving) return setState(STATES.MOVE, now);
-      if (now < p.successUntil) return setState(STATES.QUIZ_SUCCESS, now);
-      setState(STATES.IDLE, now);
-    }
-    function say(message, seconds = 2.5) { game.message = message; game.messageUntil = performance.now() / 1000 + seconds; }
-    function closeDialogs() { document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close()); }
-    function focusGame() { canvas.focus({ preventScroll: true }); }
-    function resetGame() {
-      closeDialogs(); clearInput();
-      Object.assign(game, { phase: 'playing', elapsed: 0, quizSolved: false, activeQuiz: null, caughtAt: 0, message: '', messageUntil: 0 });
-      Object.assign(game.player, MAP.spawn, { state: STATES.IDLE, stateSince: performance.now() / 1000,
-        facing: 'down', moving: false, running: false, jumpTime: null, successUntil: 0 });
-      Object.assign(game.teacher, MAP.teacher.from, { direction: 1, angle: Math.PI / 2 });
-      game.lastFrame = performance.now();
-      focusGame();
-    }
-    function openMenu() {
-      if (game.phase !== 'playing') return;
-      game.phase = 'paused'; clearInput();
-      document.getElementById('menu-title').textContent = '잠깐, 쉬어가기';
-      document.getElementById('menu-description').textContent = '시간과 선생님의 순찰이 멈춰 있어요. 준비되면 연습을 이어가세요.';
-      document.getElementById('play-button').textContent = '계속하기 →';
-      document.getElementById('menu-restart').hidden = false;
-      ui['menu-dialog'].showModal();
-    }
-    function resumeGame() { closeDialogs(); game.phase = 'playing'; game.lastFrame = performance.now(); clearInput(); focusGame(); }
-    function finish(kind) {
-      game.phase = kind; clearInput(); closeDialogs();
-      const results = {
-        escaped: ['PRACTICE COMPLETE', '탈출 연습 성공!', '과학 퀴즈를 풀고 출구에 도착했어요. 오늘은 여기까지!'],
-        failed: ['TRY AGAIN', '선생님에게 들켰어요!', '빨간 부채꼴은 선생님의 감시 범위예요. 다음에는 옆으로 돌아가 보세요.'],
-        timeout: ['TIME OVER', '연습 시간이 끝났어요', '90초가 지났어요. 다시 시작해서 나만의 탈출 경로를 찾아보세요.']
+      const STATES = Object.freeze({
+        IDLE: "IDLE",
+        MOVE: "MOVE",
+        JUMP: "JUMP",
+        CAUGHT: "CAUGHT",
+        QUIZ_SUCCESS: "QUIZ_SUCCESS",
+      });
+      // 상대 경로. 개별 PNG 프레임 목록은 기존 구현처럼 사용할 수 있습니다. 왼쪽 이동은 자동 반전.
+      const ASSET_PATHS = { sheet: "", teacherFacesLeft: true }; // 예: sheet:'assets/characters.png'
+      const CHARACTER_IMAGES = {
+        idle: [],
+        caught: [],
+        jump: [],
+        moveRight: [],
+        moveDown: [],
+        moveUp: [],
+        quizSuccess: [],
       };
-      const [caption, title, description] = results[kind];
-      document.getElementById('result-caption').textContent = caption;
-      document.getElementById('result-title').textContent = title;
-      document.getElementById('result-description').textContent = description;
-      ui['result-dialog'].showModal();
-    }
-    function caught(now) {
-      if (game.phase !== 'playing') return;
-      game.phase = 'caught'; game.caughtAt = now; clearInput();
-      game.player.successUntil = 0; game.player.jumpTime = null;
-      setState(STATES.CAUGHT, now); say('앗, 선생님에게 들켰다!');
-    }
-
-    // ── 3. 입력과 상호작용 ──
-    function nearestObject() {
-      const objects = [...MAP.objects, { id: 'teacher', type: 'npc', ...game.teacher, label: '선생님' }];
-      return objects.filter(object => Math.hypot(object.x - game.player.x, object.y - game.player.y) <= CONFIG.interactionDistance)
-        .sort((a, b) => Math.hypot(a.x - game.player.x, a.y - game.player.y) - Math.hypot(b.x - game.player.x, b.y - game.player.y))[0];
-    }
-    function interact() {
-      const object = nearestObject();
-      if (!object) return say('조금 더 가까이 다가가서 E를 눌러 주세요.');
-      if (game.player.jumpTime !== null) return say('착지한 다음에 다시 확인해 보세요.');
-      if (object.type === 'quiz') {
-        if (game.quizSolved) return say('과학 퀴즈 완료! 오른쪽 위 출구로 가세요.');
-        openQuiz(object.quizId);
-      } else if (object.type === 'exit') {
-        if (!game.quizSolved) return say('먼저 복도 중앙의 과학 퀴즈를 풀어 주세요.');
-        finish('escaped');
-      } else if (object.type === 'npc') {
-        say('선생님이 순찰 중이에요. 가까이 다가가면 들킬 수 있어요.');
-      }
-    }
-    function openQuiz(quizId) {
-      const quiz = QUIZZES.find(item => item.id === quizId);
-      if (!quiz) return say('아직 준비 중인 퀴즈예요.');
-      game.phase = 'quiz'; game.activeQuiz = quiz; clearInput();
-      document.getElementById('quiz-question').textContent = quiz.question;
-      document.getElementById('quiz-feedback').textContent = '';
-      const choices = document.getElementById('quiz-choices'); choices.replaceChildren();
-      quiz.answers.forEach((answer, index) => {
-        const button = document.createElement('button'); button.type = 'button'; button.className = 'choice';
-        button.textContent = `${index + 1}. ${answer}`;
-        button.addEventListener('click', () => {
-          if (game.phase !== 'quiz') return;
-          if (index !== quiz.correct) { document.getElementById('quiz-feedback').textContent = '조금만 더 생각해 볼까요? 다시 선택해 보세요.'; return; }
-          game.quizSolved = true;
-          resumeGame();
-          game.player.successUntil = performance.now() / 1000 + CONFIG.successDuration;
-          resolveState(performance.now() / 1000);
-          say(quiz.explanation);
+      const TEACHER_IMAGES = { normal: [], caught: [], lost: [] };
+      // 제공한 1536×1024 안내 시트 좌표. 다른 해상도도 같은 비율이면 자동 확대/축소됩니다.
+      const row = (xs, y, w, h) => xs.map((x) => [x, y, w, h]);
+      const SHEET_FRAMES = {
+        idle: row([32, 168, 302, 436], 146, 130, 140),
+        moveDown: row([38, 174, 310, 446], 376, 130, 124),
+        moveUp: row([610, 746, 882, 1018], 376, 130, 124),
+        moveRight: row([36, 172, 308, 444], 568, 130, 126),
+        jump: row([610, 742, 874, 1006], 124, 130, 180),
+        caught: [[1236, 462, 244, 224]],
+        quizSuccess: [[1236, 154, 244, 183]],
+        teacherNormal: row([22, 152, 282, 412], 842, 132, 148),
+        teacherCaught: row([574, 718, 862], 842, 144, 148),
+        teacherLost: row([1050, 1194, 1338], 842, 144, 148),
+      };
+      const QUIZZES = [
+        {
+          floor: "2",
+          room: "화장실",
+          question: "보통 1기압에서 물이 끓는 온도는?",
+          answers: ["0°C", "25°C", "100°C", "200°C"],
+          correct: 2,
+          digit: "7",
+        },
+        {
+          floor: "2",
+          room: "교무실",
+          question: "원자에서 음전하를 띠는 입자는?",
+          answers: ["양성자", "전자", "중성자", "원자핵"],
+          correct: 1,
+          digit: "3",
+        },
+        {
+          floor: "2",
+          room: "음악실",
+          question: "소리가 전달되기 가장 어려운 곳은?",
+          answers: ["공기", "물", "철", "진공"],
+          correct: 3,
+          digit: "1",
+        },
+        {
+          floor: "2",
+          room: "교실",
+          question: "식물이 광합성할 때 주로 흡수하는 기체는?",
+          answers: ["산소", "질소", "이산화탄소", "헬륨"],
+          correct: 2,
+          digit: "8",
+        },
+        {
+          floor: "1",
+          room: "과학실",
+          question: "전류의 세기를 나타내는 단위는?",
+          answers: ["암페어(A)", "미터(m)", "초(s)", "켈빈(K)"],
+          correct: 0,
+          digit: "2",
+        },
+        {
+          floor: "1",
+          room: "매점",
+          question: "산성 용액의 일반적인 pH 범위는?",
+          answers: ["7보다 크다", "항상 7이다", "7보다 작다", "항상 14이다"],
+          correct: 2,
+          digit: "4",
+        },
+        {
+          floor: "1",
+          room: "체력단련실",
+          question: "물체가 운동 상태를 유지하려는 성질은?",
+          answers: ["증발", "굴절", "관성", "확산"],
+          correct: 2,
+          digit: "6",
+        },
+        {
+          floor: "1",
+          room: "화장실",
+          question: "지구가 태양 주위를 한 바퀴 도는 데 걸리는 시간은?",
+          answers: ["약 하루", "약 일주일", "약 한 달", "약 1년"],
+          correct: 3,
+          digit: "9",
+        },
+      ].map((q, index) => ({ ...q, id: index, slot: index % 4 }));
+      const ORDINALS = ["첫 번째", "두 번째", "세 번째", "네 번째"];
+      const ROOMS = [
+        { x: 56, y: 54, w: 344, h: 216, doorX: 230, top: true },
+        { x: 600, y: 54, w: 344, h: 216, doorX: 770, top: true },
+        { x: 56, y: 422, w: 344, h: 184, doorX: 230, top: false },
+        { x: 600, y: 422, w: 344, h: 184, doorX: 770, top: false },
+      ];
+      function makeFloor(floor) {
+        const obstacles = [],
+          objects = [],
+          rooms = [];
+        QUIZZES.filter((q) => q.floor === floor).forEach((quiz, i) => {
+          const room = { ...ROOMS[i], name: quiz.room, quizId: quiz.id };
+          rooms.push(room);
+          const { x, y, w, h, doorX, top } = room,
+            doorY = top ? y + h - 12 : y;
+          obstacles.push(
+            { x, y, w: 12, h },
+            { x: x + w - 12, y, w: 12, h },
+            { x, y: top ? y : y + h - 12, w, h: 12 },
+            { x, y: doorY, w: doorX - 34 - x, h: 12 },
+            { x: doorX + 34, y: doorY, w: x + w - doorX - 34, h: 12 },
+            { x: doorX - 34, y: doorY, w: 68, h: 12, door: quiz.id },
+          );
+          // 각 방의 가구도 충돌 데이터와 그림 데이터를 공유합니다.
+          if (quiz.room === "화장실")
+            for (let j = 0; j < 3; j++)
+              obstacles.push({
+                x: x + 36 + j * 86,
+                y: y + 46,
+                w: 56,
+                h: 55,
+                kind: "sink",
+              });
+          else if (quiz.room === "음악실")
+            obstacles.push({
+              x: x + 40,
+              y: y + 51,
+              w: 160,
+              h: 54,
+              kind: "piano",
+            });
+          else
+            for (let j = 0; j < 3; j++)
+              obstacles.push({
+                x: x + 36 + j * 89,
+                y: y + 57,
+                w: 61,
+                h: 38,
+                kind: quiz.room === "매점" ? "shelf" : "desk",
+              });
+          objects.push({
+            id: `quiz-${quiz.id}`,
+            type: "quiz",
+            quizId: quiz.id,
+            x: doorX,
+            y: top ? doorY + 39 : doorY - 28,
+            label: quiz.room,
+          });
         });
-        choices.append(button);
+        objects.push({
+          id: "stairs",
+          type: floor === "2" ? "password" : "stairs",
+          x: 500,
+          y: 104,
+          label: floor === "2" ? "계단 · 1층으로" : "계단 · 2층으로",
+          target: floor === "2" ? "1" : "2",
+        });
+        if (floor === "1")
+          objects.push({
+            id: "front-door",
+            type: "password",
+            x: 500,
+            y: 574,
+            label: "정문 · 운동장으로",
+            target: "yard",
+          });
+        return {
+          id: floor,
+          name: `${floor}층`,
+          spawn: { x: 500, y: 340 },
+          obstacles,
+          objects,
+          rooms,
+        };
+      }
+      const MAPS = {
+        2: makeFloor("2"),
+        1: makeFloor("1"),
+        yard: {
+          id: "yard",
+          name: "운동장",
+          spawn: { x: 105, y: 108 },
+          rooms: [],
+          obstacles: [
+            { x: 245, y: 170, w: 108, h: 34, kind: "hedge" },
+            { x: 450, y: 275, w: 126, h: 36, kind: "hedge" },
+            { x: 610, y: 415, w: 90, h: 34, kind: "hedge" },
+            { x: 115, y: 300, w: 112, h: 18, kind: "bench", low: true },
+          ],
+          objects: [
+            { id: "gate", type: "exit", x: 920, y: 570, label: "교문" },
+          ],
+        },
+      };
+      const PATROL = [
+        { x: 760, y: 125 },
+        { x: 760, y: 505 },
+        { x: 330, y: 505 },
+        { x: 330, y: 125 },
+      ];
+      // ── 2. 상태 관리. setTimeout으로 캐릭터 상태를 덮어쓰지 않습니다. ──
+      const canvas = document.getElementById("game"),
+        ctx = canvas.getContext("2d");
+      ctx.imageSmoothingEnabled = false;
+      const keys = new Set(),
+        $ = (id) => document.getElementById(id);
+      const game = {
+        phase: "ready",
+        map: "2",
+        elapsed: 0,
+        lastFrame: 0,
+        hearts: 3,
+        caughtCount: 0,
+        solved: new Set(),
+        unlocked: new Set(),
+        activeQuiz: null,
+        passwordTarget: null,
+        yardEnteredAt: 0,
+        caughtAt: 0,
+        message: "",
+        messageUntil: 0,
+        player: {
+          ...MAPS["2"].spawn,
+          state: STATES.IDLE,
+          stateSince: 0,
+          facing: "down",
+          moving: false,
+          running: false,
+          jumpTime: null,
+          successUntil: 0,
+          invincibleUntil: 0,
+          stamina: 3,
+          exhausted: false,
+        },
+        teacher: null,
+      };
+      const imageSets = {},
+        teacherImageSets = {};
+      let spriteSheet = null;
+      function loadImages(definition, target) {
+        for (const [name, paths] of Object.entries(definition))
+          target[name] = paths.map((path) => {
+            const image = new Image();
+            image.onerror = () => {
+              image.dataset.failed = "true";
+            };
+            image.src = path;
+            return image;
+          });
+      }
+      loadImages(CHARACTER_IMAGES, imageSets);
+      loadImages(TEACHER_IMAGES, teacherImageSets);
+      async function loadSheet(source) {
+        const image = new Image();
+        image.src = source;
+        await image.decode();
+        if (Math.abs(image.naturalWidth / image.naturalHeight - 1.5) > 0.08)
+          throw new Error(
+            "제공한 전체 시트와 같은 3:2 비율 이미지를 선택해 주세요.",
+          );
+        spriteSheet = image;
+        $("asset-status").textContent = "캐릭터 동작 시트 적용됨";
+        $("sheet-feedback").textContent =
+          "플레이어와 선생님의 동작 시트를 적용했어요.";
+      }
+      if (ASSET_PATHS.sheet)
+        loadSheet(ASSET_PATHS.sheet).catch(() => {
+          $("sheet-feedback").textContent =
+            "시트를 불러오지 못해 임시 캐릭터를 사용합니다.";
+        });
+      $("sheet-file").addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        try {
+          await loadSheet(url);
+        } catch (error) {
+          $("sheet-feedback").textContent = error.message;
+        } finally {
+          URL.revokeObjectURL(url);
+        }
       });
-      ui['quiz-dialog'].showModal();
-    }
-    window.addEventListener('keydown', event => {
-      if (event.code === 'Escape' && game.phase === 'playing') { event.preventDefault(); openMenu(); return; }
-      if (game.phase !== 'playing' || !controlKeys.has(event.code)) return;
-      event.preventDefault();
-      const fresh = !keys.has(event.code) && !event.repeat;
-      keys.add(event.code);
-      // 이동/점프 입력은 축하 상태를 즉시 취소. 오래된 타이머로 복원하지 않음.
-      if (movementKeys.has(event.code) || event.code === 'Space') game.player.successUntil = 0;
-      if (event.code === 'Space' && fresh && game.player.jumpTime === null) game.player.jumpTime = 0;
-      if (event.code === 'KeyE' && fresh) interact();
-    });
-    window.addEventListener('keyup', event => {
-      if (game.phase === 'playing' && controlKeys.has(event.code)) event.preventDefault();
-      keys.delete(event.code);
-    });
-    window.addEventListener('blur', () => { clearInput(); openMenu(); });
-    document.addEventListener('visibilitychange', () => { if (document.hidden) { clearInput(); openMenu(); } });
-    document.getElementById('play-button').addEventListener('click', () => game.phase === 'ready' ? resetGame() : resumeGame());
-    document.getElementById('pause-button').addEventListener('click', openMenu);
-    document.getElementById('menu-restart').addEventListener('click', resetGame);
-    document.getElementById('retry-button').addEventListener('click', resetGame);
-    document.getElementById('quiz-close').addEventListener('click', resumeGame);
-    ui['menu-dialog'].addEventListener('cancel', event => { event.preventDefault(); if (game.phase === 'paused') resumeGame(); });
-    ui['quiz-dialog'].addEventListener('cancel', event => { event.preventDefault(); resumeGame(); });
-    ui['result-dialog'].addEventListener('cancel', event => event.preventDefault());
-
-    // ── 4. 물리: 시간 기반 이동, 대각선 정규화, 충돌, 점프, 선생님 감시 ──
-    function blocked(x, y) {
-      const r = CONFIG.playerRadius, b = MAP.bounds;
-      if (x - r < b.left || x + r > b.right || y - r < b.top || y + r > b.bottom) return true;
-      return MAP.obstacles.some(o => {
-        const closestX = Math.max(o.x, Math.min(x, o.x + o.w));
-        const closestY = Math.max(o.y, Math.min(y, o.y + o.h));
-        return Math.hypot(x - closestX, y - closestY) < r;
+      function newTeacher() {
+        return {
+          ...PATROL[0],
+          mode: "WAIT",
+          waypoint: 1,
+          facing: "left",
+          emotion: "normal",
+          emotionUntil: 0,
+          lastSeen: null,
+          searchWait: 0,
+          path: [],
+          repath: 0,
+        };
+      }
+      game.teacher = newTeacher();
+      function setState(state, now) {
+        if (game.player.state !== state) {
+          game.player.state = state;
+          game.player.stateSince = now;
+        }
+      }
+      function clearInput() {
+        keys.clear();
+        game.player.moving = false;
+        game.player.running = false;
+      }
+      function resolveState(now) {
+        const p = game.player;
+        if (
+          game.phase === "caught" ||
+          (game.phase === "failed" && game.hearts === 0)
+        )
+          return setState(STATES.CAUGHT, now);
+        if (p.jumpTime !== null) return setState(STATES.JUMP, now);
+        if (p.moving) return setState(STATES.MOVE, now);
+        if (now < p.successUntil) return setState(STATES.QUIZ_SUCCESS, now);
+        setState(STATES.IDLE, now);
+      }
+      function say(message, seconds = 2.5) {
+        game.message = message;
+        game.messageUntil = performance.now() / 1000 + seconds;
+      }
+      function closeDialogs() {
+        document
+          .querySelectorAll("dialog[open]")
+          .forEach((dialog) => dialog.close());
+      }
+      function focusGame() {
+        canvas.focus({ preventScroll: true });
+      }
+      function resetGame() {
+        closeDialogs();
+        clearInput();
+        Object.assign(game, {
+          phase: "playing",
+          map: "2",
+          elapsed: 0,
+          lastFrame: performance.now(),
+          hearts: 3,
+          caughtCount: 0,
+          solved: new Set(),
+          unlocked: new Set(),
+          activeQuiz: null,
+          passwordTarget: null,
+          yardEnteredAt: 0,
+          caughtAt: 0,
+          message: "",
+          messageUntil: 0,
+          teacher: newTeacher(),
+        });
+        Object.assign(game.player, MAPS["2"].spawn, {
+          state: STATES.IDLE,
+          stateSince: performance.now() / 1000,
+          facing: "down",
+          moving: false,
+          running: false,
+          jumpTime: null,
+          successUntil: 0,
+          invincibleUntil: 0,
+          stamina: CONFIG.staminaMax,
+          exhausted: false,
+        });
+        focusGame();
+      }
+      function openMenu() {
+        if (game.phase !== "playing") return;
+        game.phase = "paused";
+        clearInput();
+        $("menu-title").textContent = "잠깐, 쉬어가기";
+        $("menu-description").textContent =
+          "메뉴에서는 시간과 선생님의 움직임이 멈춰요. 준비되면 이어서 탈출하세요.";
+        $("play-button").textContent = "계속하기 →";
+        $("menu-restart").hidden = false;
+        $("menu-dialog").showModal();
+      }
+      function resumeGame() {
+        closeDialogs();
+        game.phase = "playing";
+        game.lastFrame = performance.now();
+        clearInput();
+        focusGame();
+      }
+      function finish(kind) {
+        game.phase = kind;
+        clearInput();
+        game.player.jumpTime = null;
+        closeDialogs();
+        const won = kind === "escaped";
+        $("result-caption").textContent = won ? "ESCAPE COMPLETE" : "TRY AGAIN";
+        $("result-title").textContent = won ? "야자탈출 성공!" : "게임 실패";
+        $("result-description").textContent =
+          `${won ? "교문에 무사히 도착했어요." : game.hearts === 0 ? "하트 3개를 모두 잃었어요." : "90초가 지났어요."} 소요 시간 ${game.elapsed.toFixed(1)}초 · 선생님에게 잡힌 횟수 ${game.caughtCount}회`;
+        $("result-dialog").showModal();
+      }
+      function enterMap(id) {
+        game.map = id;
+        clearInput();
+        Object.assign(game.player, MAPS[id].spawn, {
+          jumpTime: null,
+          successUntil: 0,
+          facing: "down",
+        });
+        if (id === "yard") {
+          game.yardEnteredAt = game.elapsed;
+          game.teacher = newTeacher();
+        }
+        say(
+          id === "yard"
+            ? "운동장 도착! 5초 후 선생님이 순찰해요. 오른쪽 아래 교문으로 가세요."
+            : `${id}층에 도착했어요. 문 앞에서 E를 눌러 보세요.`,
+        );
+        focusGame();
+      }
+      function caught(now) {
+        if (
+          game.phase !== "playing" ||
+          game.elapsed < game.player.invincibleUntil
+        )
+          return;
+        game.hearts--;
+        game.caughtCount++;
+        game.caughtAt = game.elapsed;
+        game.phase = "caught";
+        clearInput();
+        Object.assign(game.player, { jumpTime: null, successUntil: 0 });
+        Object.assign(game.teacher, {
+          mode: "RECOVER",
+          emotion: "caught",
+          emotionUntil: game.elapsed + 2,
+        });
+        setState(STATES.CAUGHT, now);
+        say("선생님에게 걸렸다!", 2);
+        if (game.hearts <= 0) finish("failed");
+      }
+      // ── 3. 퀴즈 / 비밀번호 / 입력 ──
+      function nearestObject() {
+        const object = MAPS[game.map].objects
+          .filter(
+            (o) =>
+              Math.hypot(o.x - game.player.x, o.y - game.player.y) <=
+              CONFIG.interactionDistance,
+          )
+          .sort(
+            (a, b) =>
+              Math.hypot(a.x - game.player.x, a.y - game.player.y) -
+              Math.hypot(b.x - game.player.x, b.y - game.player.y),
+          )[0];
+        // 문/출구 상호작용을 우선하고, 가까운 NPC 안내 기능도 유지합니다.
+        if (object) return object;
+        if (
+          game.map === "yard" &&
+          Math.hypot(
+            game.teacher.x - game.player.x,
+            game.teacher.y - game.player.y,
+          ) <= CONFIG.interactionDistance
+        )
+          return { ...game.teacher, type: "npc", label: "선생님" };
+      }
+      function interact() {
+        const object = nearestObject();
+        if (!object) return say("조금 더 가까이 다가가서 E를 눌러 주세요.");
+        if (game.player.jumpTime !== null)
+          return say("착지한 다음에 다시 확인해 보세요.");
+        if (object.type === "quiz") {
+          if (game.solved.has(object.quizId))
+            return say(
+              "이미 완료한 방이에요. 숫자는 상단에서 확인할 수 있어요.",
+            );
+          openQuiz(object.quizId);
+        } else if (object.type === "password") openPassword(object.target);
+        else if (object.type === "stairs") enterMap(object.target);
+        else if (object.type === "exit") finish("escaped");
+        else if (object.type === "npc")
+          say("선생님이 순찰 중이에요. 장애물을 이용해 시선을 피해 보세요.");
+      }
+      function showQuizChoices() {
+        const quiz = game.activeQuiz,
+          choices = $("quiz-choices");
+        choices.replaceChildren();
+        $("quiz-feedback").textContent = "";
+        $("quiz-retry").hidden = true;
+        quiz.answers.forEach((answer, index) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "choice";
+          button.textContent = `${index + 1}. ${answer}`;
+          button.addEventListener("click", () => {
+            if (game.phase !== "quiz" || game.solved.has(quiz.id)) return;
+            if (index !== quiz.correct) {
+              choices.replaceChildren();
+              const cross = document.createElement("span");
+              cross.className = "cross";
+              cross.textContent = "✕";
+              choices.append(cross);
+              $("quiz-feedback").textContent = "아쉬워요! 다시 풀어 보세요.";
+              $("quiz-retry").hidden = false;
+              $("quiz-retry").focus();
+              return;
+            }
+            game.solved.add(quiz.id);
+            resumeGame();
+            game.player.successUntil =
+              performance.now() / 1000 + CONFIG.successDuration;
+            resolveState(performance.now() / 1000);
+            say(`정답! ${ORDINALS[quiz.slot]} 비밀번호는 ${quiz.digit}입니다.`);
+          });
+          choices.append(button);
+        });
+      }
+      function openQuiz(id) {
+        game.activeQuiz = QUIZZES[id];
+        game.phase = "quiz";
+        clearInput();
+        $("quiz-number").textContent =
+          `${game.map}층 · ${ORDINALS[game.activeQuiz.slot]} 비밀번호`;
+        $("quiz-title").textContent = game.activeQuiz.room + " 과학 퀴즈";
+        $("quiz-question").textContent = game.activeQuiz.question;
+        showQuizChoices();
+        $("quiz-dialog").showModal();
+      }
+      function openPassword(target) {
+        game.phase = "password";
+        game.passwordTarget = target;
+        clearInput();
+        $("password-title").textContent =
+          target === "1" ? "계단 · 1층으로" : "정문 · 운동장으로";
+        $("password-input").value = "";
+        $("password-feedback").textContent = "";
+        $("password-dialog").showModal();
+        $("password-input").focus();
+      }
+      $("password-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (game.phase !== "password") return;
+        const quizzes = QUIZZES.filter((q) => q.floor === game.map);
+        if (!quizzes.every((q) => game.solved.has(q.id))) {
+          $("password-feedback").textContent =
+            "먼저 이 층의 퀴즈 4개를 모두 풀어 주세요.";
+          return;
+        }
+        if (
+          $("password-input").value !== quizzes.map((q) => q.digit).join("")
+        ) {
+          $("password-feedback").textContent =
+            "비밀번호가 달라요. 상단 숫자를 보고 다시 입력해 주세요.";
+          $("password-input").select();
+          return;
+        }
+        game.unlocked.add(game.map);
+        const target = game.passwordTarget;
+        resumeGame();
+        enterMap(target);
       });
-    }
-    // 장애물은 시선을 가리지만 선생님과 직접 접촉하면 항상 들킵니다.
-    function segmentHitsRect(x1, y1, x2, y2, rect) {
-      let near = 0, far = 1;
-      for (const [start, delta, min, max] of [[x1, x2 - x1, rect.x, rect.x + rect.w], [y1, y2 - y1, rect.y, rect.y + rect.h]]) {
-        if (Math.abs(delta) < 0.000001) { if (start < min || start > max) return false; }
-        else { const a = (min - start) / delta, b = (max - start) / delta;
-          near = Math.max(near, Math.min(a, b)); far = Math.min(far, Math.max(a, b)); if (near > far) return false; }
-      }
-      return true;
-    }
-    function teacherSeesPlayer() {
-      const t = game.teacher, p = game.player, spec = MAP.teacher;
-      const dx = p.x - t.x, dy = p.y - t.y, distance = Math.hypot(dx, dy);
-      if (distance <= spec.radius + CONFIG.playerRadius) return true;
-      if (distance > spec.viewDistance) return false;
-      const difference = Math.atan2(Math.sin(Math.atan2(dy, dx) - t.angle), Math.cos(Math.atan2(dy, dx) - t.angle));
-      return Math.abs(difference) <= spec.viewAngle / 2 && !MAP.obstacles.some(o => segmentHitsRect(t.x, t.y, p.x, p.y, o));
-    }
-    function update(dt, now) {
-      if (game.phase === 'caught') { if (now - game.caughtAt >= CONFIG.caughtDuration) finish('failed'); return; }
-      if (game.phase !== 'playing') { resolveState(now); return; }
-      game.elapsed += dt;
-      if (game.elapsed >= CONFIG.duration) { game.elapsed = CONFIG.duration; finish('timeout'); return; }
-      const p = game.player;
-      let dx = Number(keys.has('KeyD') || keys.has('ArrowRight')) - Number(keys.has('KeyA') || keys.has('ArrowLeft'));
-      let dy = Number(keys.has('KeyS') || keys.has('ArrowDown')) - Number(keys.has('KeyW') || keys.has('ArrowUp'));
-      const length = Math.hypot(dx, dy);
-      p.moving = length > 0; p.running = p.moving && (keys.has('ShiftLeft') || keys.has('ShiftRight'));
-      if (length > 0) {
-        dx /= length; dy /= length;
-        p.facing = dx !== 0 ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
-        const speed = p.running ? CONFIG.runSpeed : CONFIG.walkSpeed;
-        if (!blocked(p.x + dx * speed * dt, p.y)) p.x += dx * speed * dt;
-        if (!blocked(p.x, p.y + dy * speed * dt)) p.y += dy * speed * dt;
-      }
-      if (p.jumpTime !== null) { p.jumpTime += dt; if (p.jumpTime >= CONFIG.jumpDuration) p.jumpTime = null; }
-      const t = game.teacher, spec = MAP.teacher;
-      t.y += t.direction * spec.speed * dt;
-      if (t.y >= spec.to.y) { t.y = spec.to.y; t.direction = -1; }
-      if (t.y <= spec.from.y) { t.y = spec.from.y; t.direction = 1; }
-      t.angle = t.direction > 0 ? Math.PI / 2 : -Math.PI / 2;
-      if (teacherSeesPlayer()) caught(now);
-      resolveState(now);
-    }
-
-    // ── 5. 맵/캐릭터 그림: Canvas만 사용해 이미지나 외부 라이브러리 없이 실행 ──
-    function box(x, y, w, h, color, radius = 0) { ctx.fillStyle = color; ctx.beginPath(); ctx.roundRect(x, y, w, h, radius); ctx.fill(); }
-    function text(value, x, y, size = 14, color = '#cbd9d3', align = 'left') {
-      ctx.fillStyle = color; ctx.font = `600 ${size}px "Malgun Gothic", system-ui, sans-serif`; ctx.textAlign = align; ctx.fillText(value, x, y);
-    }
-    function ellipse(x, y, rx, ry, color) { ctx.fillStyle = color; ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); }
-    function drawMap(now) {
-      box(0, 0, 1000, 600, '#20343d');
-      box(32, 78, 400, 492, '#34494b'); box(432, 78, 536, 492, '#2b4148');
-      ctx.strokeStyle = '#ffffff08'; ctx.lineWidth = 1;
-      for (let x = 32; x <= 968; x += 40) { ctx.beginPath(); ctx.moveTo(x, 78); ctx.lineTo(x, 570); ctx.stroke(); }
-      for (let y = 78; y <= 570; y += 40) { ctx.beginPath(); ctx.moveTo(32, y); ctx.lineTo(968, y); ctx.stroke(); }
-      box(16, 64, 968, 15, '#536869'); box(16, 570, 968, 14, '#192b33');
-      box(16, 64, 16, 520, '#182c35'); box(968, 64, 16, 520, '#182c35');
-      // 창문과 칠판
-      for (const x of [80, 270, 580, 755]) {
-        box(x, 10, 115, 43, '#7898a2', 3); box(x + 4, 14, 107, 35, '#203a51', 2);
-        box(x + 54, 14, 3, 35, '#7898a2'); box(x + 4, 31, 107, 3, '#7898a2');
-        ellipse(x + 87, 24, 5, 5, '#e3ddb5');
-      }
-      box(115, 84, 232, 40, '#172f2c', 3); text('조용히 · 야간자율학습 중', 231, 109, 13, '#b5c9b1', 'center');
-      text('3학년 교실', 64, 546, 13, '#99afaa'); text('1층 복도', 591, 546, 13, '#8aa3a8');
-      ctx.setLineDash([7, 10]); ctx.strokeStyle = '#c5e79d18'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(425, 508); ctx.lineTo(576, 508); ctx.lineTo(576, 234); ctx.stroke(); ctx.setLineDash([]);
-      // 책상과 의자 (충돌 위치와 같은 데이터)
-      MAP.obstacles.slice(0, 6).forEach(o => {
-        box(o.x + 25, o.y + 55, 60, 20, '#1c3037', 4); box(o.x + 29, o.y + 59, 52, 8, '#6a7c76', 2);
-        box(o.x + 3, o.y + 5, o.w, o.h, '#152b32', 5); box(o.x, o.y, o.w, o.h, '#968366', 4); box(o.x + 4, o.y + 4, o.w - 8, o.h - 12, '#bcaa85', 3);
-        box(o.x + 14, o.y + 12, 29, 21, '#dedcc5', 2); box(o.x + 29, o.y + 12, 1, 21, '#aaa994'); box(o.x + 67, o.y + 16, 21, 4, '#5f7875', 1);
+      $("password-input").addEventListener("input", (event) => {
+        event.target.value = event.target.value
+          .replace(/[^0-9]/g, "")
+          .slice(0, 4);
       });
-      // 퀴즈 단말기
-      box(463, 120, 74, 53, '#142e34', 5); box(469, 126, 62, 35, '#47665c', 3);
-      text(game.quizSolved ? '✓' : '?', 500, 153, 25, '#d4eead', 'center');
-      text(game.quizSolved ? '퀴즈 완료' : '과학 퀴즈', 500, 106, 13, '#c5e79d', 'center');
-      // 출구: 퀴즈를 풀면 활성화
-      box(879, 78, 73, 72, game.quizSolved ? '#48674b' : '#3d5053', 3);
-      box(888, 85, 55, 58, '#1e3535', 2); box(928, 117, 5, 5, '#d7d8a2', 2);
-      box(883, 50, 65, 23, game.quizSolved ? '#c5e79d' : '#687f75', 3); text('EXIT ↗', 915, 66, 12, '#1e352f', 'center');
-      text('출구', 915, 175, 13, '#c5e79d', 'center');
-      // 선생님 감시 범위
-      const t = game.teacher, spec = MAP.teacher;
-      const glow = ctx.createRadialGradient(t.x, t.y, 5, t.x, t.y, spec.viewDistance);
-      glow.addColorStop(0, '#f49e7d55'); glow.addColorStop(1, '#f49e7d0c');
-      ctx.fillStyle = glow; ctx.beginPath(); ctx.moveTo(t.x, t.y); ctx.arc(t.x, t.y, spec.viewDistance, t.angle - spec.viewAngle / 2, t.angle + spec.viewAngle / 2); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = '#efad8a5c'; ctx.lineWidth = 1; ctx.stroke();
-      ellipse(t.x, t.y + 7, 21, 9, '#071c2866'); box(t.x - 15, t.y - 22, 30, 29, '#bc987c', 8);
-      ellipse(t.x, t.y - 29, 15, 16, '#decbb2'); box(t.x - 15, t.y - 44, 30, 10, '#34404a', 6);
-      box(t.x - 13, t.y - 31, 10, 6, '#263e46', 2); box(t.x + 3, t.y - 31, 10, 6, '#263e46', 2);
-      text('선생님', t.x, t.y - 55, 12, '#e8bc9e', 'center');
-      drawPlayer(now);
-      const target = game.phase === 'playing' ? nearestObject() : null;
-      if (target) { box(target.x - 42, target.y + 22, 84, 27, '#c5e79d', 5); text('[E] 확인', target.x, target.y + 40, 12, '#243c32', 'center'); }
-      if (game.phase === 'caught') { ctx.fillStyle = '#ef846a20'; ctx.fillRect(0, 0, 1000, 600); }
-    }
-    function spriteFrame(now) {
-      const p = game.player, elapsed = Math.max(0, now - p.stateSince);
-      let name = 'idle';
-      if (p.state === STATES.CAUGHT) name = 'caught';
-      else if (p.state === STATES.JUMP) name = 'jump';
-      else if (p.state === STATES.QUIZ_SUCCESS) name = 'quizSuccess';
-      else if (p.state === STATES.MOVE) name = p.facing === 'left' || p.facing === 'right' ? 'moveRight' : p.facing === 'up' ? 'moveUp' : 'moveDown';
-      let frames = imageSets[name];
-      if (!frames.length && name === 'moveUp') frames = imageSets.moveDown;
-      if (!frames.length) return null;
-      let index;
-      if (p.state === STATES.JUMP) index = Math.min(frames.length - 1, Math.floor((p.jumpTime || 0) / CONFIG.jumpDuration * frames.length));
-      else if (p.state === STATES.CAUGHT) index = Math.min(frames.length - 1, Math.floor(elapsed / CONFIG.caughtDuration * frames.length));
-      else if (p.state === STATES.QUIZ_SUCCESS) index = 0;
-      else index = Math.floor(elapsed * (p.state === STATES.MOVE ? (p.running ? 12 : 7) : 3)) % frames.length;
-      const image = frames[index];
-      return image.complete && image.naturalWidth > 0 && !image.dataset.failed ? image : null;
-    }
-    function drawPlayer(now) {
-      const p = game.player;
-      const lift = p.jumpTime === null ? 0 : Math.sin(Math.PI * p.jumpTime / CONFIG.jumpDuration) * CONFIG.jumpHeight;
-      const isMoving = p.state === STATES.MOVE || (p.state === STATES.JUMP && p.moving);
-      const gait = isMoving ? Math.sin(now * (p.running ? 21 : 12)) : 0;
-      const bob = p.state === STATES.IDLE ? Math.sin(now * 3) * 1.2 : Math.abs(gait) * 2;
-      ellipse(p.x, p.y + 3, Math.max(9, 18 - lift / 8), 7, '#071c2870');
-      ctx.save(); ctx.translate(p.x, p.y - lift - bob);
-      if (p.state === STATES.CAUGHT) ctx.translate(Math.sin(now * 40) * 2.5, 0);
-      const image = spriteFrame(now);
-      if (image) {
-        if (p.facing === 'left' && (p.state === STATES.MOVE || p.state === STATES.JUMP)) ctx.scale(-1, 1);
-        ctx.drawImage(image, -34, -62, 68, 68);
-      } else {
-        // 외부 파일 없는 임시 고양이. 좌/우는 동일 원본을 반전하고 위쪽은 뒷모습 표시.
-        if (p.facing === 'left') ctx.scale(-1, 1);
-        const side = p.facing === 'left' || p.facing === 'right';
-        ellipse(12, -9, 11, 6, '#709eaf');
-        ctx.lineWidth = 2.5; ctx.strokeStyle = '#142b38';
-        for (const [x, offset] of [[-9, gait * 3], [9, -gait * 3]]) { ctx.fillStyle = '#e8eee4'; ctx.beginPath(); ctx.ellipse(x, -1 + offset, 6, 5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
-        ctx.fillStyle = '#edf2e6'; ctx.beginPath();
-        ctx.moveTo(-19, -28); ctx.quadraticCurveTo(-25, -43, -17, -53); ctx.quadraticCurveTo(-13, -57, -4, -43);
-        ctx.quadraticCurveTo(4, -45, 8, -43); ctx.quadraticCurveTo(21, -59, 23, -48); ctx.lineTo(24, -31);
-        ctx.bezierCurveTo(37, -8, 17, 3, 0, 1); ctx.bezierCurveTo(-24, 3, -33, -15, -19, -28); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#7ca5b6'; ctx.beginPath(); ctx.moveTo(-19, -30); ctx.lineTo(-17, -50); ctx.lineTo(-4, -39); ctx.quadraticCurveTo(3, -42, 9, -39); ctx.lineTo(21, -50); ctx.lineTo(23, -29); ctx.quadraticCurveTo(8, -25, 2, -33); ctx.quadraticCurveTo(-8, -24, -19, -30); ctx.fill();
-        if (p.facing !== 'up' || p.state === STATES.CAUGHT || p.state === STATES.QUIZ_SUCCESS) {
-          const offset = side ? 6 : 0;
-          ellipse(-9 + offset, -23, 2.2, 3, '#172b35'); ellipse(10 + offset, -23, 2.2, 3, '#172b35');
-          ellipse(-15 + offset, -17, 4, 2, '#e6a299'); ellipse(16 + offset, -17, 4, 2, '#e6a299');
-          ctx.strokeStyle = '#172b35'; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.arc(0 + offset, -19, 3, 0, Math.PI); ctx.stroke();
-          if (p.state === STATES.CAUGHT) { text('!', 3, -65, 24, '#f4b69b', 'center'); box(0, -37, 2, 7, '#6e9aab'); box(5, -37, 2, 9, '#6e9aab'); }
-        } else { ellipse(1, -7, 5, 6, '#7ca5b6'); }
+      const controlKeys = new Set([
+        "KeyW",
+        "KeyA",
+        "KeyS",
+        "KeyD",
+        "ArrowUp",
+        "ArrowLeft",
+        "ArrowDown",
+        "ArrowRight",
+        "ShiftLeft",
+        "ShiftRight",
+        "Space",
+        "KeyE",
+      ]);
+      const movementKeys = new Set([
+        "KeyW",
+        "KeyA",
+        "KeyS",
+        "KeyD",
+        "ArrowUp",
+        "ArrowLeft",
+        "ArrowDown",
+        "ArrowRight",
+      ]);
+      window.addEventListener("keydown", (event) => {
+        if (event.code === "Escape" && game.phase === "playing") {
+          event.preventDefault();
+          openMenu();
+          return;
+        }
+        const typing = event.target instanceof HTMLInputElement;
+        if (controlKeys.has(event.code) && !typing && game.phase !== "ready")
+          event.preventDefault();
+        if (game.phase !== "playing" || typing || !controlKeys.has(event.code))
+          return;
+        const fresh = !keys.has(event.code) && !event.repeat;
+        keys.add(event.code);
+        if (movementKeys.has(event.code) || event.code === "Space")
+          game.player.successUntil = 0;
+        if (event.code === "Space" && fresh && game.player.jumpTime === null) {
+          game.player.jumpStart = { x: game.player.x, y: game.player.y };
+          game.player.jumpTime = 0;
+        }
+        if (event.code === "KeyE" && fresh) interact();
+      });
+      window.addEventListener("keyup", (event) => {
+        if (controlKeys.has(event.code) && game.phase === "playing")
+          event.preventDefault();
+        keys.delete(event.code);
+      });
+      window.addEventListener("blur", () => {
+        clearInput();
+        openMenu();
+      });
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          clearInput();
+          openMenu();
+        }
+      });
+      $("play-button").addEventListener("click", () =>
+        game.phase === "ready" ? resetGame() : resumeGame(),
+      );
+      $("pause-button").addEventListener("click", openMenu);
+      $("menu-restart").addEventListener("click", resetGame);
+      $("retry-button").addEventListener("click", resetGame);
+      $("quiz-retry").addEventListener("click", showQuizChoices);
+      $("quiz-close").addEventListener("click", resumeGame);
+      $("password-close").addEventListener("click", resumeGame);
+      $("menu-dialog").addEventListener("cancel", (event) => {
+        event.preventDefault();
+        if (game.phase === "paused") resumeGame();
+      });
+      for (const id of ["quiz-dialog", "password-dialog"])
+        $(id).addEventListener("cancel", (event) => {
+          event.preventDefault();
+          resumeGame();
+        });
+      $("result-dialog").addEventListener("cancel", (event) =>
+        event.preventDefault(),
+      );
+      // ── 4. 충돌과 이동. 낮은 벤치는 점프 높이가 충분할 때만 통과. ──
+      function jumpLift() {
+        return game.player.jumpTime === null
+          ? 0
+          : Math.sin((Math.PI * game.player.jumpTime) / CONFIG.jumpDuration) *
+              CONFIG.jumpHeight;
       }
-      if (p.state === STATES.QUIZ_SUCCESS) { text('✧', -34, -42, 24, '#f2cb78', 'center'); text('✧', 34, -35, 24, '#f2cb78', 'center'); text('정답!', 0, -72, 14, '#d1edaa', 'center'); }
-      ctx.restore();
-      text('나', p.x, p.y + 24, 11, '#bcd7df', 'center');
-    }
-    function updateUI(now) {
-      const remaining = Math.max(0, Math.ceil(CONFIG.duration - game.elapsed));
-      ui['time-value'].textContent = `${String(Math.floor(remaining / 60)).padStart(2, '0')}:${String(remaining % 60).padStart(2, '0')}`;
-      ui.timer.classList.toggle('urgent', remaining <= 20);
-      ui['state-label'].textContent = game.player.state;
-      ui['quiz-step'].classList.toggle('done', game.quizSolved);
-      document.getElementById('pause-button').disabled = game.phase !== 'playing';
-      const target = nearestObject();
-      ui.hint.textContent = now < game.messageUntil ? game.message : game.phase === 'ready' ? '시작 버튼을 눌러 연습을 시작하세요.' :
-        target ? `${target.label} 가까이에 있어요. E를 눌러 확인하세요.` : game.quizSolved ? '퀴즈 완료! 선생님을 피해 오른쪽 위 출구로 가세요.' : 'WASD로 이동해 복도 중앙의 과학 퀴즈를 찾아보세요.';
-    }
-    function frame(timestamp) {
-      const now = timestamp / 1000;
-      // 큰 프레임 지연은 최대 0.1초, 충돌 판정은 1/120초 이하로 나눠 벽/감시 범위 관통 방지.
-      let remaining = game.lastFrame ? Math.min((timestamp - game.lastFrame) / 1000, 0.1) : 0;
-      game.lastFrame = timestamp;
-      while (remaining > 0) { const dt = Math.min(remaining, 1 / 120); update(dt, now); remaining -= dt; }
-      drawMap(now); updateUI(now); requestAnimationFrame(frame);
-    }
-    ui['menu-dialog'].showModal();
-    requestAnimationFrame(frame);
-  </script>
-</body>
+      function solids(forTeacher = false) {
+        return MAPS[game.map].obstacles.filter(
+          (o) =>
+            (o.door === undefined || !game.solved.has(o.door)) &&
+            (!o.low || forTeacher || jumpLift() < 14),
+        );
+      }
+      function circleRect(x, y, r, o) {
+        return (
+          Math.hypot(
+            x - Math.max(o.x, Math.min(x, o.x + o.w)),
+            y - Math.max(o.y, Math.min(y, o.y + o.h)),
+          ) < r
+        );
+      }
+      function blocked(x, y, r = CONFIG.playerRadius, forTeacher = false) {
+        if (x - r < 24 || x + r > 976 || y - r < 24 || y + r > 616) return true;
+        return solids(forTeacher).some((o) => circleRect(x, y, r, o));
+      }
+      function landPlayer() {
+        const p = game.player;
+        p.jumpTime = null;
+        // 벤치 위에서 멈췄다면 가장 가까운 안전한 가장자리로 착지. 공중에 계속 머물지 않습니다.
+        const obstacle = MAPS[game.map].obstacles.find(
+          (o) => o.low && circleRect(p.x, p.y, CONFIG.playerRadius, o),
+        );
+        if (!obstacle) return;
+        const r = CONFIG.playerRadius + 1,
+          candidates = [
+            { x: obstacle.x - r, y: p.y },
+            { x: obstacle.x + obstacle.w + r, y: p.y },
+            { x: p.x, y: obstacle.y - r },
+            { x: p.x, y: obstacle.y + obstacle.h + r },
+          ];
+        candidates.sort(
+          (a, b) =>
+            Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y),
+        );
+        const safe = candidates.find((v) => !blocked(v.x, v.y)) || p.jumpStart;
+        if (safe) Object.assign(p, safe);
+      }
+      function moveEntity(entity, dx, dy, speed, dt, r, teacher = false) {
+        let x = entity.x + dx * speed * dt,
+          y = entity.y + dy * speed * dt;
+        if (!blocked(x, entity.y, r, teacher)) entity.x = x;
+        if (!blocked(entity.x, y, r, teacher)) entity.y = y;
+      }
+      function segmentHitsRect(x1, y1, x2, y2, rect) {
+        let near = 0,
+          far = 1;
+        for (const [start, delta, min, max] of [
+          [x1, x2 - x1, rect.x, rect.x + rect.w],
+          [y1, y2 - y1, rect.y, rect.y + rect.h],
+        ]) {
+          if (Math.abs(delta) < 0.000001) {
+            if (start < min || start > max) return false;
+          } else {
+            const a = (min - start) / delta,
+              b = (max - start) / delta;
+            near = Math.max(near, Math.min(a, b));
+            far = Math.min(far, Math.max(a, b));
+            if (near > far) return false;
+          }
+        }
+        return true;
+      }
+      function lineClear(a, b, padding = 0) {
+        return !solids(true).some((o) =>
+          segmentHitsRect(a.x, a.y, b.x, b.y, {
+            x: o.x - padding,
+            y: o.y - padding,
+            w: o.w + padding * 2,
+            h: o.h + padding * 2,
+          }),
+        );
+      }
+      function teacherSeesPlayer() {
+        const t = game.teacher,
+          p = game.player;
+        return (
+          Math.hypot(t.x - p.x, t.y - p.y) <= CONFIG.detectionRadius &&
+          lineClear(t, p)
+        );
+      }
+      // 순찰/추격 모두 같은 충돌 규칙을 사용. 가려진 위치로 이동할 때는 작은 격자 BFS로 우회.
+      function findPath(from, to) {
+        if (lineClear(from, to, CONFIG.teacherRadius)) return [{ ...to }];
+        const cell = 24,
+          cols = 40,
+          rows = 24;
+        const grid = (p) => ({
+          x: Math.max(0, Math.min(cols - 1, Math.floor((p.x - 24) / cell))),
+          y: Math.max(0, Math.min(rows - 1, Math.floor((p.y - 24) / cell))),
+        });
+        const center = (p) => ({
+            x: 24 + p.x * cell + cell / 2,
+            y: 24 + p.y * cell + cell / 2,
+          }),
+          start = grid(from),
+          goal = grid(to),
+          id = (p) => p.y * cols + p.x;
+        const queue = [start],
+          visited = new Map([[id(start), null]]);
+        let reached = null;
+        for (let head = 0; head < queue.length; head++) {
+          const node = queue[head];
+          if (node.x === goal.x && node.y === goal.y) {
+            reached = node;
+            break;
+          }
+          for (const [dx, dy] of [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1],
+          ]) {
+            const next = { x: node.x + dx, y: node.y + dy };
+            if (
+              next.x < 0 ||
+              next.y < 0 ||
+              next.x >= cols ||
+              next.y >= rows ||
+              visited.has(id(next))
+            )
+              continue;
+            const pos = center(next);
+            if (blocked(pos.x, pos.y, CONFIG.teacherRadius, true)) continue;
+            visited.set(id(next), node);
+            queue.push(next);
+          }
+        }
+        if (!reached) return [];
+        const result = [];
+        for (
+          let node = reached;
+          visited.get(id(node)) !== null;
+          node = visited.get(id(node))
+        )
+          result.unshift(center(node));
+        return result;
+      }
+      function updateTeacher(dt) {
+        const t = game.teacher,
+          p = game.player;
+        if (game.elapsed - game.yardEnteredAt < 5) {
+          t.mode = "WAIT";
+          return;
+        }
+        if (t.mode === "WAIT") t.mode = "PATROL";
+        if (game.elapsed >= t.emotionUntil) t.emotion = "normal";
+        const seen = game.elapsed >= p.invincibleUntil && teacherSeesPlayer();
+        if (seen) {
+          if (t.mode !== "CHASE") {
+            t.path = [];
+            t.repath = 0;
+          }
+          t.mode = "CHASE";
+          t.lastSeen = { x: p.x, y: p.y };
+          t.emotion = "normal";
+        } else if (t.mode === "CHASE") {
+          t.mode = "SEARCH";
+          t.searchWait = 1.2;
+          t.emotion = "lost";
+          t.emotionUntil = game.elapsed + 2;
+          t.path = [];
+          t.repath = 0;
+        }
+        let goal =
+          t.mode === "CHASE"
+            ? p
+            : t.mode === "SEARCH"
+              ? t.lastSeen
+              : PATROL[t.waypoint];
+        if (!goal) {
+          t.mode = "PATROL";
+          goal = PATROL[t.waypoint];
+        }
+        const distance = Math.hypot(goal.x - t.x, goal.y - t.y);
+        if (
+          t.mode === "SEARCH" &&
+          (distance < 18 || (!t.path.length && t.repath > 0))
+        ) {
+          t.searchWait -= dt;
+          if (t.searchWait <= 0) {
+            t.mode = "PATROL";
+            t.path = [];
+            t.repath = 0;
+          }
+        }
+        if (t.mode === "PATROL" && distance < 10) {
+          t.waypoint = (t.waypoint + 1) % PATROL.length;
+          goal = PATROL[t.waypoint];
+          t.repath = 0;
+        }
+        t.repath -= dt;
+        if (t.repath <= 0) {
+          t.path = findPath(t, goal);
+          t.repath = 0.3;
+        }
+        const next = t.path[0];
+        if (next) {
+          const dx = next.x - t.x,
+            dy = next.y - t.y,
+            len = Math.hypot(dx, dy);
+          if (len < 5) t.path.shift();
+          else {
+            if (Math.abs(dx) > 1) t.facing = dx > 0 ? "right" : "left";
+            moveEntity(
+              t,
+              dx / len,
+              dy / len,
+              Math.min(CONFIG.walkSpeed, len / Math.max(dt, 0.001)),
+              dt,
+              CONFIG.teacherRadius,
+              true,
+            );
+          }
+        }
+        if (
+          Math.hypot(t.x - p.x, t.y - p.y) <=
+          CONFIG.teacherRadius + CONFIG.playerRadius
+        )
+          caught(performance.now() / 1000);
+      }
+      function update(dt, now) {
+        if (game.phase === "caught") {
+          if (game.elapsed - game.caughtAt >= CONFIG.caughtDuration) {
+            Object.assign(game.player, MAPS[game.map].spawn, {
+              jumpTime: null,
+              successUntil: 0,
+              invincibleUntil: game.elapsed + CONFIG.invincibleDuration,
+            });
+            Object.assign(game.teacher, {
+              mode: "PATROL",
+              lastSeen: null,
+              path: [],
+              repath: 0,
+            });
+            game.phase = "playing";
+            say("다시 출발! 잠깐 동안 선생님에게 들키지 않아요.");
+          }
+          resolveState(now);
+          return;
+        }
+        if (game.phase !== "playing") {
+          resolveState(now);
+          return;
+        }
+        const p = game.player;
+        let dx =
+            Number(keys.has("KeyD") || keys.has("ArrowRight")) -
+            Number(keys.has("KeyA") || keys.has("ArrowLeft")),
+          dy =
+            Number(keys.has("KeyS") || keys.has("ArrowDown")) -
+            Number(keys.has("KeyW") || keys.has("ArrowUp"));
+        const len = Math.hypot(dx, dy);
+        p.moving = len > 0;
+        if (p.exhausted && p.stamina >= 0.8) p.exhausted = false;
+        p.running =
+          p.moving &&
+          (keys.has("ShiftLeft") || keys.has("ShiftRight")) &&
+          !p.exhausted &&
+          p.stamina > 0;
+        p.stamina = Math.max(
+          0,
+          Math.min(CONFIG.staminaMax, p.stamina + (p.running ? -1 : 0.8) * dt),
+        );
+        if (p.stamina === 0) p.exhausted = true;
+        if (p.jumpTime !== null) {
+          p.jumpTime += dt;
+          if (p.jumpTime >= CONFIG.jumpDuration) landPlayer();
+        }
+        if (len) {
+          dx /= len;
+          dy /= len;
+          p.facing =
+            dx !== 0 ? (dx > 0 ? "right" : "left") : dy > 0 ? "down" : "up";
+          moveEntity(
+            p,
+            dx,
+            dy,
+            p.running ? CONFIG.runSpeed : CONFIG.walkSpeed,
+            dt,
+            CONFIG.playerRadius,
+          );
+        }
+        if (game.map === "yard") updateTeacher(dt);
+        resolveState(now);
+      }
+      // ── 5. 이미지 프레임 선택. 개별 PNG 또는 제공한 전체 안내 시트 중 선택 ──
+      function readyImage(image) {
+        return (
+          image &&
+          image.complete &&
+          image.naturalWidth > 0 &&
+          !image.dataset.failed
+        );
+      }
+      function playerAnimationName() {
+        const p = game.player;
+        if (p.state === STATES.CAUGHT) return "caught";
+        if (p.state === STATES.JUMP) return "jump";
+        if (p.state === STATES.QUIZ_SUCCESS) return "quizSuccess";
+        if (p.state === STATES.MOVE)
+          return p.facing === "left" || p.facing === "right"
+            ? "moveRight"
+            : p.facing === "up"
+              ? "moveUp"
+              : "moveDown";
+        return "idle";
+      }
+      function spriteFrame(now) {
+        const p = game.player,
+          name = playerAnimationName(),
+          elapsed = Math.max(0, now - p.stateSince);
+        let frames = imageSets[name];
+        if (!frames.length && name === "moveUp") frames = imageSets.moveDown;
+        const rects = SHEET_FRAMES[name],
+          count = frames.length || (spriteSheet ? rects.length : 0);
+        if (!count) return null;
+        let index;
+        if (name === "jump")
+          index = Math.min(
+            count - 1,
+            Math.floor(((p.jumpTime || 0) / CONFIG.jumpDuration) * count),
+          );
+        else if (name === "caught")
+          index = Math.min(
+            count - 1,
+            Math.floor((elapsed / CONFIG.caughtDuration) * count),
+          );
+        else if (name === "quizSuccess") index = 0;
+        else
+          index =
+            Math.floor(
+              elapsed * (name.startsWith("move") ? (p.running ? 12 : 7) : 3),
+            ) % count;
+        if (frames.length)
+          return readyImage(frames[index])
+            ? { image: frames[index], rect: null }
+            : null;
+        return { image: spriteSheet, rect: rects[index] };
+      }
+      function teacherFrame(now) {
+        const t = game.teacher,
+          name = t.emotion,
+          frames = teacherImageSets[name];
+        const rects =
+          SHEET_FRAMES[
+            name === "caught"
+              ? "teacherCaught"
+              : name === "lost"
+                ? "teacherLost"
+                : "teacherNormal"
+          ];
+        const count = frames.length || (spriteSheet ? rects.length : 0);
+        if (!count) return null;
+        const age =
+          name === "normal"
+            ? now
+            : Math.max(0, 2 - (t.emotionUntil - game.elapsed));
+        const index =
+          name === "normal"
+            ? Math.floor(age * 7) % count
+            : Math.min(count - 1, Math.floor((age / 2) * count));
+        return frames.length
+          ? readyImage(frames[index])
+            ? { image: frames[index], rect: null }
+            : null
+          : { image: spriteSheet, rect: rects[index] };
+      }
+      function drawFrame(frame, height) {
+        if (frame.rect) {
+          const scale = frame.image.naturalWidth / 1536,
+            [x, y, w, h] = frame.rect;
+          ctx.drawImage(
+            frame.image,
+            x * scale,
+            y * scale,
+            w * scale,
+            h * scale,
+            (-height * w) / h / 2,
+            -height,
+            (height * w) / h,
+            height,
+          );
+        } else {
+          const width =
+            (height * frame.image.naturalWidth) / frame.image.naturalHeight;
+          ctx.drawImage(frame.image, -width / 2, -height, width, height);
+        }
+      }
+      // ── 6. 타일풍 맵. 그림과 충돌에 같은 벽/문 데이터를 사용 ──
+      function box(x, y, w, h, color, radius = 0) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.roundRect(Math.round(x), Math.round(y), w, h, radius);
+        ctx.fill();
+      }
+      function text(value, x, y, size = 14, color = "#64795b", align = "left") {
+        ctx.fillStyle = color;
+        ctx.font = `600 ${size}px "Malgun Gothic",system-ui,sans-serif`;
+        ctx.textAlign = align;
+        ctx.fillText(value, Math.round(x), Math.round(y));
+      }
+      function ellipse(x, y, rx, ry, color) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      function tileFloor(color, line) {
+        box(0, 0, 1000, 640, color);
+        ctx.strokeStyle = line;
+        ctx.lineWidth = 1;
+        for (let x = 24; x < 980; x += 32) {
+          ctx.beginPath();
+          ctx.moveTo(x, 24);
+          ctx.lineTo(x, 616);
+          ctx.stroke();
+        }
+        for (let y = 24; y < 620; y += 32) {
+          ctx.beginPath();
+          ctx.moveTo(24, y);
+          ctx.lineTo(976, y);
+          ctx.stroke();
+        }
+      }
+      function drawSchool() {
+        const map = MAPS[game.map];
+        tileFloor("#f1e5c8", "#e7d9ba");
+        box(24, 279, 952, 130, "#f8efd6");
+        box(414, 24, 172, 592, "#f8efd6");
+        for (const room of map.rooms) {
+          box(
+            room.x + 12,
+            room.y + 12,
+            room.w - 24,
+            room.h - 24,
+            room.quizId % 2 === 0 ? "#e5e7ce" : "#e8e3cb",
+          );
+          text(
+            room.name,
+            room.x + room.w / 2,
+            room.y + 35,
+            16,
+            "#82906b",
+            "center",
+          );
+        }
+        for (const o of map.obstacles) {
+          if (o.door !== undefined) {
+            if (!game.solved.has(o.door)) {
+              box(o.x, o.y, o.w, o.h, "#a5b68c");
+              box(o.x + 4, o.y + 2, o.w - 8, 3, "#d9dfb8");
+            } else {
+              box(o.x, o.y, o.w, o.h, "#e7edc9");
+              text("✓", o.x + o.w / 2, o.y + 10, 12, "#6b945b", "center");
+            }
+            continue;
+          }
+          if (o.kind === "desk") {
+            box(o.x + 2, o.y + 4, o.w, o.h, "#b9b195");
+            box(o.x, o.y, o.w, o.h - 4, "#cbb48a");
+            box(o.x + 5, o.y + 4, o.w - 10, 7, "#e0cfaa");
+            box(o.x + 12, o.y + 13, 20, 14, "#fbf5db");
+          } else if (o.kind === "sink") {
+            box(o.x, o.y, o.w, o.h, "#c1d1cc");
+            box(o.x + 7, o.y + 8, o.w - 14, o.h - 19, "#edf2e6");
+            box(o.x + o.w / 2 - 3, o.y + 6, 6, 13, "#8aadaa");
+          } else if (o.kind === "piano") {
+            box(o.x, o.y, o.w, o.h, "#667869");
+            for (let x = o.x + 8; x < o.x + o.w - 8; x += 12) {
+              box(x, o.y + 24, 10, 22, "#f7f4dc");
+              box(x + 7, o.y + 24, 5, 11, "#4f6355");
+            }
+          } else if (o.kind === "shelf") {
+            box(o.x, o.y, o.w, o.h, "#bcaa80");
+            for (let j = 0; j < 3; j++)
+              box(
+                o.x + 8 + j * 15,
+                o.y + 9,
+                9,
+                20,
+                ["#c4cf92", "#e2b097", "#9ebdb3"][j],
+              );
+          } else {
+            box(o.x + 2, o.y + 4, o.w, o.h, "#b7bc9c");
+            box(o.x, o.y, o.w, o.h, "#cbd0b0");
+            box(o.x, o.y, o.w, 4, "#e2e5ca");
+          }
+        }
+        // 계단/정문은 벽 사이의 별도 상호작용 지점입니다.
+        box(455, 41, 90, 84, "#c4d1bc");
+        for (let j = 0; j < 5; j++) box(462, 48 + j * 13, 76, 5, "#a3b29c");
+        text(
+          game.map === "2" ? "1F ↓" : "2F ↑",
+          500,
+          144,
+          14,
+          "#6b8365",
+          "center",
+        );
+        if (game.map === "1") {
+          box(459, 565, 82, 43, "#8fa89a");
+          box(464, 569, 72, 33, "#c6d5bf");
+          box(497, 569, 4, 34, "#8fa89a");
+          text("정문 ↓", 500, 551, 14, "#6d8867", "center");
+        }
+        text("복도", 500, 347, 17, "#c0bda3", "center");
+      }
+      function drawYard() {
+        tileFloor("#c4d4a0", "#c0d09a");
+        box(66, 77, 155, 160, "#e5dcb9");
+        box(61, 65, 168, 21, "#9db78d");
+        text("학교 출입구", 144, 110, 13, "#77916b", "center");
+        box(270, 157, 456, 302, "#d5c394");
+        box(282, 169, 432, 278, "#bdd098");
+        ctx.strokeStyle = "#edf0ce";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(300, 185, 396, 246);
+        ctx.beginPath();
+        ctx.moveTo(498, 185);
+        ctx.lineTo(498, 431);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(498, 308, 52, 0, Math.PI * 2);
+        ctx.stroke();
+        text("운동장", 498, 394, 15, "#94aa7f", "center");
+        box(72, 522, 867, 75, "#e4d6b3");
+        box(858, 527, 104, 66, "#eee5c9");
+        text("교문 →", 910, 568, 15, "#7c956b", "center");
+        for (const o of MAPS.yard.obstacles) {
+          if (o.kind === "hedge") {
+            box(o.x + 2, o.y + 5, o.w, o.h, "#92a575");
+            box(o.x, o.y, o.w, o.h - 4, "#8fb077");
+            for (let x = o.x + 6; x < o.x + o.w - 8; x += 16)
+              box(x, o.y + 4, 9, 7, "#bad19b");
+          } else {
+            box(o.x + 5, o.y + 12, 8, 13, "#9c9f77");
+            box(o.x + o.w - 13, o.y + 12, 8, 13, "#9c9f77");
+            box(o.x, o.y, o.w, o.h, "#b6a77b");
+            box(o.x + 3, o.y + 3, o.w - 6, 4, "#d8c89c");
+          }
+        }
+        text("낮은 벤치 · Space", 171, 288, 11, "#8b9a75", "center");
+        const t = game.teacher;
+        if (game.elapsed - game.yardEnteredAt >= 5) {
+          ctx.fillStyle = t.mode === "CHASE" ? "#edb19d27" : "#dfcd9827";
+          ctx.beginPath();
+          ctx.arc(t.x, t.y, CONFIG.detectionRadius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = "#b6a78670";
+          ctx.setLineDash([5, 7]);
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.setLineDash([]);
+        } else
+          text(
+            `순찰까지 ${Math.max(0, Math.ceil(5 - (game.elapsed - game.yardEnteredAt)))}초`,
+            t.x,
+            t.y - 91,
+            13,
+            "#a28f67",
+            "center",
+          );
+        drawTeacher(performance.now() / 1000);
+      }
+      function drawTeacher(now) {
+        const t = game.teacher,
+          frame = teacherFrame(now);
+        ellipse(t.x, t.y + 2, 22, 8, "#596e4c35");
+        ctx.save();
+        ctx.translate(t.x, t.y);
+        if (frame) {
+          if (
+            (ASSET_PATHS.teacherFacesLeft && t.facing === "right") ||
+            (!ASSET_PATHS.teacherFacesLeft && t.facing === "left")
+          )
+            ctx.scale(-1, 1);
+          drawFrame(frame, 61);
+        } else {
+          if (t.facing === "right") ctx.scale(-1, 1);
+          box(-19, -47, 38, 40, "#d6ba83", 6);
+          box(-15, -52, 30, 9, "#847a54", 3);
+          box(-20, -14, 40, 16, "#eff1d6", 3);
+          box(-22, -20, 44, 6, "#3f574b", 2);
+          box(-14, -38, 10, 7, "#3e5142", 2);
+          box(5, -38, 10, 7, "#3e5142", 2);
+          box(-17, -24, 7, 4, "#d9977e");
+          box(11, -24, 7, 4, "#d9977e");
+        }
+        ctx.restore();
+        text(
+          t.emotion === "caught"
+            ? "잡았다!"
+            : t.emotion === "lost"
+              ? "어디 갔지?"
+              : "선생님",
+          t.x,
+          t.y - 70,
+          12,
+          t.emotion === "normal" ? "#8b8261" : "#b77f63",
+          "center",
+        );
+      }
+      function drawPlayer(now) {
+        const p = game.player;
+        const lift =
+          p.jumpTime === null
+            ? 0
+            : Math.sin((Math.PI * p.jumpTime) / CONFIG.jumpDuration) *
+              CONFIG.jumpHeight;
+        const isMoving =
+          p.state === STATES.MOVE || (p.state === STATES.JUMP && p.moving);
+        const gait = isMoving ? Math.sin(now * (p.running ? 21 : 12)) : 0;
+        const bob =
+          p.state === STATES.IDLE
+            ? Math.sin(now * 3) * 1.2
+            : Math.abs(gait) * 2;
+        ellipse(p.x, p.y + 3, Math.max(9, 18 - lift / 8), 7, "#6e805c35");
+        ctx.save();
+        ctx.translate(p.x, p.y - lift - bob);
+        if (p.state === STATES.CAUGHT)
+          ctx.translate(Math.sin(now * 40) * 2.5, 0);
+        const image = spriteFrame(now);
+        if (image) {
+          if (
+            p.facing === "left" &&
+            (p.state === STATES.MOVE || p.state === STATES.JUMP)
+          )
+            ctx.scale(-1, 1);
+          drawFrame(image, 58);
+        } else {
+          // 외부 파일 없는 임시 고양이. 좌/우는 동일 원본을 반전하고 위쪽은 뒷모습 표시.
+          if (p.facing === "left") ctx.scale(-1, 1);
+          const side = p.facing === "left" || p.facing === "right";
+          ellipse(12, -9, 11, 6, "#709eaf");
+          ctx.lineWidth = 2.5;
+          ctx.strokeStyle = "#142b38";
+          for (const [x, offset] of [
+            [-9, gait * 3],
+            [9, -gait * 3],
+          ]) {
+            ctx.fillStyle = "#e8eee4";
+            ctx.beginPath();
+            ctx.ellipse(x, -1 + offset, 6, 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+          }
+          ctx.fillStyle = "#edf2e6";
+          ctx.beginPath();
+          ctx.moveTo(-19, -28);
+          ctx.quadraticCurveTo(-25, -43, -17, -53);
+          ctx.quadraticCurveTo(-13, -57, -4, -43);
+          ctx.quadraticCurveTo(4, -45, 8, -43);
+          ctx.quadraticCurveTo(21, -59, 23, -48);
+          ctx.lineTo(24, -31);
+          ctx.bezierCurveTo(37, -8, 17, 3, 0, 1);
+          ctx.bezierCurveTo(-24, 3, -33, -15, -19, -28);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = "#7ca5b6";
+          ctx.beginPath();
+          ctx.moveTo(-19, -30);
+          ctx.lineTo(-17, -50);
+          ctx.lineTo(-4, -39);
+          ctx.quadraticCurveTo(3, -42, 9, -39);
+          ctx.lineTo(21, -50);
+          ctx.lineTo(23, -29);
+          ctx.quadraticCurveTo(8, -25, 2, -33);
+          ctx.quadraticCurveTo(-8, -24, -19, -30);
+          ctx.fill();
+          if (
+            p.facing !== "up" ||
+            p.state === STATES.CAUGHT ||
+            p.state === STATES.QUIZ_SUCCESS
+          ) {
+            const offset = side ? 6 : 0;
+            ellipse(-9 + offset, -23, 2.2, 3, "#172b35");
+            ellipse(10 + offset, -23, 2.2, 3, "#172b35");
+            ellipse(-15 + offset, -17, 4, 2, "#e6a299");
+            ellipse(16 + offset, -17, 4, 2, "#e6a299");
+            ctx.strokeStyle = "#172b35";
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            ctx.arc(0 + offset, -19, 3, 0, Math.PI);
+            ctx.stroke();
+            if (p.state === STATES.CAUGHT) {
+              text("!", 3, -65, 24, "#f4b69b", "center");
+              box(0, -37, 2, 7, "#6e9aab");
+              box(5, -37, 2, 9, "#6e9aab");
+            }
+          } else {
+            ellipse(1, -7, 5, 6, "#7ca5b6");
+          }
+        }
+        if (p.state === STATES.QUIZ_SUCCESS) {
+          text("✧", -34, -42, 24, "#f2cb78", "center");
+          text("✧", 34, -35, 24, "#f2cb78", "center");
+          text("정답!", 0, -72, 14, "#d1edaa", "center");
+        }
+        ctx.restore();
+        text("나", p.x, p.y + 24, 11, "#72896b", "center");
+      }
+      function drawMap(now) {
+        ctx.imageSmoothingEnabled = false;
+        if (game.map === "yard") drawYard();
+        else drawSchool();
+        // 맵 바깥 경계는 플레이어/선생님 모두 통과할 수 없습니다.
+        for (const [x, y, w, h] of [
+          [12, 12, 976, 12],
+          [12, 616, 976, 12],
+          [12, 12, 12, 616],
+          [976, 12, 12, 616],
+        ]) {
+          box(x + 2, y + 4, w, h, "#99aa87");
+          box(x, y, w, h, "#acbc95");
+        }
+        ctx.save();
+        if (game.elapsed < game.player.invincibleUntil)
+          ctx.globalAlpha = Math.sin(now * 22) > 0.1 ? 0.45 : 1;
+        drawPlayer(now);
+        ctx.restore();
+        const target = game.phase === "playing" ? nearestObject() : null;
+        if (target) {
+          box(target.x - 31, target.y + 17, 62, 23, "#fcf9e5", 4);
+          text("[E] 확인", target.x, target.y + 33, 11, "#64845d", "center");
+        }
+        if (game.phase === "caught") {
+          ctx.fillStyle = "#edac9320";
+          ctx.fillRect(0, 0, 1000, 640);
+          text("선생님에게 걸렸다!", 500, 330, 27, "#b77861", "center");
+        }
+      }
+      function updateUI(now) {
+        const remaining = Math.max(
+          0,
+          Math.ceil(CONFIG.duration - game.elapsed),
+        );
+        $("time-value").textContent =
+          `${String(Math.floor(remaining / 60)).padStart(2, "0")}:${String(remaining % 60).padStart(2, "0")}`;
+        $("time-value").classList.toggle("urgent", remaining <= 20);
+        $("hearts").textContent =
+          "♥".repeat(game.hearts) + "♡".repeat(3 - game.hearts);
+        $("hearts").setAttribute("aria-label", `하트 ${game.hearts}개`);
+        $("caught-count").textContent = game.caughtCount + "회";
+        for (const floor of ["2", "1"])
+          $("code-" + floor).textContent = QUIZZES.filter(
+            (q) => q.floor === floor,
+          )
+            .map((q) => (game.solved.has(q.id) ? q.digit : "?"))
+            .join(" ");
+        const floorNames = {
+          2: "2층 · 과학 퀴즈와 계단",
+          1: "1층 · 정문을 향해",
+          yard: "운동장 · 교문을 향해",
+        };
+        $("floor-label").textContent = floorNames[game.map];
+        $("map-detail").textContent =
+          game.map === "yard"
+            ? "오른쪽 아래 교문에서 E"
+            : `퀴즈 ${QUIZZES.filter((q) => q.floor === game.map && game.solved.has(q.id)).length} / 4`;
+        for (const id of ["2", "1", "yard"]) {
+          $("route-" + id).classList.toggle("active", game.map === id);
+          $("route-" + id).classList.toggle(
+            "done",
+            id === "2"
+              ? game.unlocked.has("2")
+              : id === "1"
+                ? game.unlocked.has("1")
+                : game.phase === "escaped",
+          );
+        }
+        $("state-label").textContent = game.player.state;
+        $("ai-label").textContent =
+          game.map !== "yard"
+            ? "운동장에서 대기"
+            : {
+                WAIT: "대기",
+                PATROL: "순찰",
+                CHASE: "추격",
+                SEARCH: "마지막 위치 확인",
+                RECOVER: "잡음",
+              }[game.teacher.mode];
+        $("stamina-bar").style.width =
+          `${(game.player.stamina / CONFIG.staminaMax) * 100}%`;
+        $("stamina-meter").setAttribute(
+          "aria-valuenow",
+          game.player.stamina.toFixed(1),
+        );
+        $("pause-button").disabled = game.phase !== "playing";
+        const target = nearestObject();
+        $("hint").textContent =
+          now < game.messageUntil
+            ? game.message
+            : game.phase === "ready"
+              ? "시작 버튼을 누르면 90초 타이머가 시작됩니다."
+              : target
+                ? target.type === "quiz"
+                  ? game.solved.has(target.quizId)
+                    ? "완료한 방입니다. 다른 방의 숫자도 모아 보세요."
+                    : `${target.label} · E키를 눌러 과학 퀴즈 풀기`
+                  : `${target.label} · E키로 상호작용`
+                : game.map === "yard"
+                  ? "선생님의 감지 범위와 장애물을 살펴 교문까지 이동하세요."
+                  : "각 방 문 앞에서 E를 눌러 비밀번호 숫자 4개를 모으세요.";
+      }
+      function frame(timestamp) {
+        const now = timestamp / 1000,
+          delta = game.lastFrame
+            ? Math.max(0, (timestamp - game.lastFrame) / 1000)
+            : 0;
+        game.lastFrame = timestamp;
+        // 타이머는 FPS와 무관한 실제 경과 시간. 퀴즈/비밀번호/잡힘 중에도 흐르고 메뉴에서만 정지.
+        if (["playing", "quiz", "password", "caught"].includes(game.phase)) {
+          game.elapsed = Math.min(CONFIG.duration, game.elapsed + delta);
+          if (game.elapsed >= CONFIG.duration) finish("failed");
+        }
+        // 물리는 최대 0.25초만 처리하고 1/120초 단위로 나눠 벽을 뚫지 않게 합니다.
+        let remaining = Math.min(delta, 0.25);
+        while (remaining > 0) {
+          const dt = Math.min(remaining, 1 / 120);
+          update(dt, now);
+          remaining -= dt;
+        }
+        drawMap(now);
+        updateUI(now);
+        requestAnimationFrame(frame);
+      }
+      $("menu-dialog").showModal();
+      requestAnimationFrame(frame);
+    </script>
+  </body>
 </html>
