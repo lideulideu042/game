@@ -496,6 +496,120 @@
           display: none;
         }
       }
+      body {
+        background: linear-gradient(#1a3159, #254f65);
+        color: #234d46;
+      }
+      .shell {
+        background: #f5fbffee;
+      }
+      .brand {
+        color: #397661;
+      }
+      .stage {
+        position: relative;
+        border-color: #3d7970;
+      }
+      .stage-bar {
+        background: #21614f;
+        color: #fff6cf;
+      }
+      .stage-bar span {
+        color: #d6eee2;
+      }
+      .quiet {
+        background: #fff5d6;
+        border-color: #cfb478;
+      }
+      .primary {
+        background: #f6d589;
+        border-color: #c39149;
+        color: #6b411c;
+      }
+      .hud {
+        border-color: #b4ceca;
+      }
+      .code-strip {
+        display: flex;
+        justify-content: center;
+        gap: 34px;
+        background: #184f4c;
+        color: #eaf7ed;
+        border-radius: 10px;
+        padding: 10px;
+        font-size: 11px;
+      }
+      .code-strip b {
+        letter-spacing: 0.3em;
+        color: #ffe398;
+        margin-left: 12px;
+      }
+      .success-popup {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        padding: 25px 38px;
+        background: #fff7da;
+        border: 4px solid #edbc48;
+        border-radius: 18px;
+        box-shadow: 0 12px 45px #1b3b5580;
+        pointer-events: none;
+        text-align: center;
+        z-index: 2;
+        min-width: 280px;
+      }
+      .success-popup b {
+        display: block;
+        color: #c34c51;
+        font-size: 42px;
+      }
+      .success-popup span {
+        display: block;
+        font-size: 22px;
+        font-weight: 900;
+        color: #32644a;
+        margin-top: 8px;
+      }
+      .intro-art {
+        font-size: 13px;
+        font-weight: 900;
+        letter-spacing: 0.18em;
+        color: #246852;
+        background: linear-gradient(120deg, #e6f1ff, #fae7bc);
+      }
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+      }
+      @media (min-width: 901px) and (max-height: 900px) {
+        .code-strip {
+          padding: 6px;
+        }
+        .shell {
+          max-width: min(1240px, calc((100dvh - 360px) * 1.5625 + 274px));
+        }
+      }
+      @media (min-width: 901px) and (max-height: 900px) {
+        .heading {
+          margin: 7px 0;
+        }
+        .heading .eyebrow,
+        .heading .subtitle {
+          display: none;
+        }
+        h1 {
+          font-size: 26px;
+          margin: 0;
+        }
+        .hud {
+          padding: 8px 14px;
+          margin-bottom: 10px;
+        }
+        .topline {
+          padding-bottom: 8px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -541,6 +655,9 @@
             aria-label="야자탈출 탑다운 게임. WASD 이동, Shift 달리기, Space 점프, E 상호작용."
             >Canvas를 지원하는 브라우저를 사용해 주세요.</canvas
           >
+          <div class="success-popup" id="success-popup" role="status" hidden>
+            <b>정답!</b><span id="success-digit"></span>
+          </div>
           <div class="stage-note" role="status">
             <span>GUIDE</span
             ><span id="hint">시작 버튼을 누르면 90초 타이머가 시작됩니다.</span>
@@ -600,15 +717,17 @@
         ><span><kbd>E</kbd> 상호작용</span><span><kbd>Esc</kbd> 메뉴</span
         ><span>마우스 좌클릭 · 답안 / 버튼</span>
       </div>
+      <div class="code-strip" aria-label="획득한 비밀번호">
+        <span>2층 <b id="bottom-code-2">? ? ? ?</b></span
+        ><span>1층 <b id="bottom-code-1">? ? ? ?</b></span>
+      </div>
       <footer class="footer">
         <span>2F → 1F → PLAYGROUND → SCHOOL GATE</span
-        ><span id="asset-status"
-          >임시 캐릭터 · 메뉴에서 이미지 시트를 적용할 수 있어요</span
-        >
+        ><span id="asset-status">원본 캐릭터 PNG 확인 중</span>
       </footer>
     </main>
     <dialog id="menu-dialog" aria-labelledby="menu-title">
-      <div class="intro-art" aria-hidden="true">☾　🏫　✧</div>
+      <div class="intro-art" aria-hidden="true">CHRISTMAS NIGHT ESCAPE</div>
       <span class="eyebrow">CHAPTER 03</span>
       <h2 id="menu-title">야자탈출</h2>
       <p id="menu-description">
@@ -633,14 +752,11 @@
         처음부터 다시 시작</button
       ><a class="quiet dialog-secondary" href="main.html#chapters"
         >챕터 선택으로 돌아가기</a
-      ><label class="sheet-control"
-        >캐릭터 동작 시트 불러오기 (제공한 전체 시트)<input
-          id="sheet-file"
-          type="file"
-          accept="image/png,image/jpeg,image/webp"
-      /></label>
-      <p id="sheet-feedback" class="small-note" role="status">
-        이미지가 없어도 모든 조작을 사용할 수 있어요.
+      ><button id="asset-retry" class="quiet dialog-secondary" type="button">
+        원본 이미지 다시 확인
+      </button>
+      <p id="asset-feedback" class="small-note" role="status">
+        원본 캐릭터 PNG를 확인하고 있어요.
       </p>
     </dialog>
     <dialog id="quiz-dialog" aria-labelledby="quiz-title">
@@ -695,18 +811,18 @@
         width: 1000,
         height: 640,
         duration: 90,
-        walkSpeed: 190,
-        runSpeed: 285,
+        walkSpeed: 218.5,
+        runSpeed: 327.75,
         playerRadius: 13,
         teacherRadius: 17,
-        jumpDuration: 0.65,
+        jumpDuration: 0.5,
         jumpHeight: 40,
         interactionDistance: 63,
-        successDuration: 2,
+        successDuration: 1.5,
         caughtDuration: 2,
         invincibleDuration: 3,
         staminaMax: 3,
-        detectionRadius: 160,
+        detectionRadius: 210,
       });
       const STATES = Object.freeze({
         IDLE: "IDLE",
@@ -715,36 +831,26 @@
         CAUGHT: "CAUGHT",
         QUIZ_SUCCESS: "QUIZ_SUCCESS",
       });
-      // 상대 경로. 개별 PNG 프레임 목록은 기존 구현처럼 사용할 수 있습니다. 왼쪽 이동은 자동 반전.
-      const ASSET_PATHS = { sheet: "", teacherFacesLeft: true }; // 예: sheet:'assets/characters.png'
-      const CHARACTER_IMAGES = {
-        idle: [],
-        caught: [],
-        jump: [],
-        moveRight: [],
-        moveDown: [],
-        moveUp: [],
-        quizSuccess: [],
-      };
-      const TEACHER_IMAGES = { normal: [], caught: [], lost: [] };
-      // 제공한 1536×1024 안내 시트 좌표. 다른 해상도도 같은 비율이면 자동 확대/축소됩니다.
-      const row = (xs, y, w, h) => xs.map((x) => [x, y, w, h]);
-      const SHEET_FRAMES = {
-        idle: row([32, 168, 302, 436], 146, 130, 140),
-        moveDown: row([38, 174, 310, 446], 376, 130, 124),
-        moveUp: row([610, 746, 882, 1018], 376, 130, 124),
-        moveRight: row([36, 172, 308, 444], 568, 130, 126),
-        jump: row([610, 742, 874, 1006], 124, 130, 180),
-        caught: [[1236, 462, 244, 224]],
-        quizSuccess: [[1236, 154, 244, 183]],
-        teacherNormal: row([22, 152, 282, 412], 842, 132, 148),
-        teacherCaught: row([574, 718, 862], 842, 144, 148),
-        teacherLost: row([1050, 1194, 1338], 842, 144, 148),
+      // 원본에서 배경만 제거한 PNG만 사용합니다. 이미지가 없으면 시작을 차단합니다.
+      const ASSET_PATHS = {
+        player: {
+          idle: "assets/player/idle.png",
+          caught: "assets/player/caught.png",
+          jump: "assets/player/jump.png",
+          walk: "assets/player/walk.png",
+          success: "assets/player/success.png",
+        },
+        teacher: {
+          patrol: "assets/teacher/patrol.png",
+          caught: "assets/teacher/caught.png",
+          lost: "assets/teacher/lost.png",
+        },
+        teacherFacesLeft: true,
       };
       const QUIZZES = [
         {
           floor: "2",
-          room: "화장실",
+          room: "음악실",
           question: "보통 1기압에서 물이 끓는 온도는?",
           answers: ["0°C", "25°C", "100°C", "200°C"],
           correct: 2,
@@ -752,7 +858,7 @@
         },
         {
           floor: "2",
-          room: "교무실",
+          room: "1학년 8반",
           question: "원자에서 음전하를 띠는 입자는?",
           answers: ["양성자", "전자", "중성자", "원자핵"],
           correct: 1,
@@ -760,7 +866,7 @@
         },
         {
           floor: "2",
-          room: "음악실",
+          room: "1학년 9반",
           question: "소리가 전달되기 가장 어려운 곳은?",
           answers: ["공기", "물", "철", "진공"],
           correct: 3,
@@ -768,7 +874,7 @@
         },
         {
           floor: "2",
-          room: "교실",
+          room: "교무실",
           question: "식물이 광합성할 때 주로 흡수하는 기체는?",
           answers: ["산소", "질소", "이산화탄소", "헬륨"],
           correct: 2,
@@ -808,70 +914,212 @@
         },
       ].map((q, index) => ({ ...q, id: index, slot: index % 4 }));
       const ORDINALS = ["첫 번째", "두 번째", "세 번째", "네 번째"];
-      const ROOMS = [
-        { x: 56, y: 54, w: 344, h: 216, doorX: 230, top: true },
-        { x: 600, y: 54, w: 344, h: 216, doorX: 770, top: true },
-        { x: 56, y: 422, w: 344, h: 184, doorX: 230, top: false },
-        { x: 600, y: 422, w: 344, h: 184, doorX: 770, top: false },
-      ];
+      // 큰 월드와 화면 크기를 분리합니다. 각 방의 벽·문·가구는 실제 충돌 데이터입니다.
+      const FLOOR_ROOMS = {
+        2: [
+          {
+            name: "음악실",
+            x: 80,
+            y: 100,
+            w: 480,
+            h: 410,
+            doorX: 320,
+            top: true,
+            quizId: 0,
+            theme: "music",
+          },
+          {
+            name: "1학년 8반",
+            x: 640,
+            y: 100,
+            w: 480,
+            h: 410,
+            doorX: 880,
+            top: true,
+            quizId: 1,
+            theme: "classroom",
+          },
+          {
+            name: "1학년 9반",
+            x: 1200,
+            y: 100,
+            w: 480,
+            h: 410,
+            doorX: 1440,
+            top: true,
+            quizId: 2,
+            theme: "classroom",
+          },
+          {
+            name: "화장실",
+            x: 80,
+            y: 830,
+            w: 480,
+            h: 500,
+            doorX: 320,
+            top: false,
+            theme: "toilet",
+          },
+          {
+            name: "교무실",
+            x: 1200,
+            y: 830,
+            w: 480,
+            h: 500,
+            doorX: 1440,
+            top: false,
+            quizId: 3,
+            theme: "office",
+          },
+        ],
+        1: [
+          {
+            name: "체력단련실",
+            x: 80,
+            y: 100,
+            w: 650,
+            h: 460,
+            doorX: 405,
+            top: true,
+            quizId: 6,
+            theme: "gym",
+          },
+          {
+            name: "과학실",
+            x: 1030,
+            y: 100,
+            w: 650,
+            h: 460,
+            doorX: 1355,
+            top: true,
+            quizId: 4,
+            theme: "science",
+          },
+          {
+            name: "매점",
+            x: 80,
+            y: 870,
+            w: 650,
+            h: 460,
+            doorX: 405,
+            top: false,
+            quizId: 5,
+            theme: "shop",
+          },
+          {
+            name: "화장실",
+            x: 1030,
+            y: 870,
+            w: 650,
+            h: 460,
+            doorX: 1355,
+            top: false,
+            quizId: 7,
+            theme: "toilet",
+          },
+        ],
+      };
+      function furnish(room) {
+        const x = room.x,
+          y = room.y,
+          w = room.w,
+          h = room.h,
+          result = [];
+        const add = (dx, dy, ww, hh, kind, extra = {}) =>
+          result.push({ x: x + dx, y: y + dy, w: ww, h: hh, kind, ...extra });
+        switch (room.theme) {
+          case "music":
+            add(48, 105, 160, 140, "piano");
+            add(260, 126, 42, 42, "score");
+            add(338, 98, 34, 110, "instrument");
+            add(260, 240, 42, 42, "score");
+            break;
+          case "classroom":
+            add(100, 76, w - 200, 26, "board");
+            for (let row = 0; row < 3; row++)
+              for (let col = 0; col < 3; col++)
+                add(58 + col * 126, 106 + row * 87, 72, 58, "desk");
+            break;
+          case "toilet":
+            for (let i = 0; i < 3; i++) add(40, 90 + i * 95, 76, 60, "sink");
+            for (let i = 0; i < 3; i++)
+              add(w - 150, 80 + i * 104, 112, 90, "stall");
+            break;
+          case "office":
+            for (let row = 0; row < 2; row++)
+              for (let col = 0; col < 2; col++)
+                add(54 + col * 208, 110 + row * 150, 150, 90, "office");
+            add(32, h - 93, 130, 60, "files");
+            add(w - 105, h - 93, 66, 60, "books");
+            break;
+          case "gym":
+            for (let i = 0; i < 3; i++)
+              add(42 + i * 145, 120, 108, 118, "treadmill");
+            add(w - 150, 76, 108, 58, "weights");
+            add(w - 160, 230, 116, 78, "mat");
+            break;
+          case "science":
+            add(58, 124, 192, 92, "lab");
+            add(330, 124, 192, 92, "lab");
+            add(w - 90, 90, 34, 110, "model");
+            add(60, 285, 130, 65, "lab");
+            break;
+          case "shop":
+            for (let i = 0; i < 3; i++)
+              add(46 + i * 145, 110, 105, 136, "shelf");
+            add(w - 125, 80, 78, 170, "fridge");
+            add(70, h - 115, 215, 66, "counter");
+            break;
+        }
+        return result;
+      }
       function makeFloor(floor) {
         const obstacles = [],
           objects = [],
-          rooms = [];
-        QUIZZES.filter((q) => q.floor === floor).forEach((quiz, i) => {
-          const room = { ...ROOMS[i], name: quiz.room, quizId: quiz.id };
-          rooms.push(room);
-          const { x, y, w, h, doorX, top } = room,
-            doorY = top ? y + h - 12 : y;
+          rooms = FLOOR_ROOMS[floor].map((r) => ({ ...r }));
+        for (const room of rooms) {
+          const { x, y, w, h, doorX, top, quizId } = room,
+            doorY = top ? y + h - 16 : y;
           obstacles.push(
-            { x, y, w: 12, h },
-            { x: x + w - 12, y, w: 12, h },
-            { x, y: top ? y : y + h - 12, w, h: 12 },
-            { x, y: doorY, w: doorX - 34 - x, h: 12 },
-            { x: doorX + 34, y: doorY, w: x + w - doorX - 34, h: 12 },
-            { x: doorX - 34, y: doorY, w: 68, h: 12, door: quiz.id },
+            { x, y, w: 16, h, kind: "wall" },
+            { x: x + w - 16, y, w: 16, h, kind: "wall" },
+            { x, y: top ? y : y + h - 16, w, h: 16, kind: "wall" },
+            { x, y: doorY, w: doorX - 44 - x, h: 16, kind: "wall" },
+            {
+              x: doorX + 44,
+              y: doorY,
+              w: x + w - doorX - 44,
+              h: 16,
+              kind: "wall",
+            },
           );
-          // 각 방의 가구도 충돌 데이터와 그림 데이터를 공유합니다.
-          if (quiz.room === "화장실")
-            for (let j = 0; j < 3; j++)
-              obstacles.push({
-                x: x + 36 + j * 86,
-                y: y + 46,
-                w: 56,
-                h: 55,
-                kind: "sink",
-              });
-          else if (quiz.room === "음악실")
+          if (quizId !== undefined)
             obstacles.push({
-              x: x + 40,
-              y: y + 51,
-              w: 160,
-              h: 54,
-              kind: "piano",
+              x: doorX - 44,
+              y: doorY,
+              w: 88,
+              h: 16,
+              door: quizId,
+              kind: "door",
             });
-          else
-            for (let j = 0; j < 3; j++)
-              obstacles.push({
-                x: x + 36 + j * 89,
-                y: y + 57,
-                w: 61,
-                h: 38,
-                kind: quiz.room === "매점" ? "shelf" : "desk",
-              });
+          obstacles.push(...furnish(room));
           objects.push({
-            id: `quiz-${quiz.id}`,
-            type: "quiz",
-            quizId: quiz.id,
+            id: quizId === undefined ? "toilet" : `quiz-${quizId}`,
+            type: quizId === undefined ? "inspect" : "quiz",
+            quizId,
             x: doorX,
-            y: top ? doorY + 39 : doorY - 28,
-            label: quiz.room,
+            y: top ? doorY + 48 : doorY - 38,
+            label: room.name,
+            description:
+              "화장실이에요. 퀴즈 표지가 있는 네 방에서 비밀번호를 모으세요.",
           });
-        });
+        }
+        obstacles.push({ x: 760, y: 1040, w: 80, h: 110, kind: "tree" });
         objects.push({
           id: "stairs",
           type: floor === "2" ? "password" : "stairs",
-          x: 500,
-          y: 104,
+          x: 130,
+          y: 700,
           label: floor === "2" ? "계단 · 1층으로" : "계단 · 2층으로",
           target: floor === "2" ? "1" : "2",
         });
@@ -879,44 +1127,97 @@
           objects.push({
             id: "front-door",
             type: "password",
-            x: 500,
-            y: 574,
-            label: "정문 · 운동장으로",
+            x: 880,
+            y: 1355,
+            label: "중앙 출입구 · 운동장으로",
             target: "yard",
           });
         return {
           id: floor,
           name: `${floor}층`,
-          spawn: { x: 500, y: 340 },
+          width: 1760,
+          height: 1440,
+          spawn: { x: 240, y: 690 },
           obstacles,
           objects,
           rooms,
         };
       }
+      const yardObstacles = [
+        { x: 1540, y: 170, w: 300, h: 290, kind: "building", label: "관리실" },
+        { x: 1540, y: 620, w: 300, h: 220, kind: "building", label: "창고" },
+        { x: 300, y: 600, w: 35, h: 160, kind: "goal" },
+        { x: 1245, y: 600, w: 35, h: 160, kind: "goal" },
+        { x: 430, y: 1225, w: 130, h: 32, kind: "bench", low: true },
+        { x: 650, y: 1225, w: 130, h: 32, kind: "bench", low: true },
+        { x: 1640, y: 1100, w: 145, h: 32, kind: "bench", low: true },
+      ];
+      for (const [x, y] of [
+        [42, 350],
+        [42, 580],
+        [42, 840],
+        [42, 1100],
+        [165, 40],
+        [450, 40],
+        [760, 40],
+        [1080, 40],
+        [1370, 40],
+        [1850, 310],
+        [1850, 580],
+        [1850, 920],
+        [1850, 1200],
+        [1850, 1450],
+        [1550, 1480],
+        [300, 1530],
+      ])
+        yardObstacles.push({ x, y, w: 72, h: 85, kind: "tree" });
       const MAPS = {
         2: makeFloor("2"),
         1: makeFloor("1"),
         yard: {
           id: "yard",
           name: "운동장",
-          spawn: { x: 105, y: 108 },
+          width: 1960,
+          height: 1680,
+          spawn: { x: 180, y: 170 },
           rooms: [],
-          obstacles: [
-            { x: 245, y: 170, w: 108, h: 34, kind: "hedge" },
-            { x: 450, y: 275, w: 126, h: 36, kind: "hedge" },
-            { x: 610, y: 415, w: 90, h: 34, kind: "hedge" },
-            { x: 115, y: 300, w: 112, h: 18, kind: "bench", low: true },
-          ],
+          obstacles: yardObstacles,
           objects: [
-            { id: "gate", type: "exit", x: 920, y: 570, label: "교문" },
+            {
+              id: "gate",
+              type: "exit",
+              x: 940,
+              y: 1590,
+              label: "학교 정문 · 탈출",
+            },
+            {
+              id: "office-yard",
+              type: "inspect",
+              x: 1670,
+              y: 490,
+              label: "관리실",
+              description:
+                "불이 켜진 관리실이에요. 건물 뒤편은 선생님의 시야를 가려요.",
+            },
+            {
+              id: "store",
+              type: "inspect",
+              x: 1685,
+              y: 865,
+              label: "창고",
+              description: "창고 옆 보행로가 교문 쪽으로 이어져요.",
+            },
           ],
         },
       };
       const PATROL = [
-        { x: 760, y: 125 },
-        { x: 760, y: 505 },
-        { x: 330, y: 505 },
-        { x: 330, y: 125 },
+        { x: 1440, y: 1040 },
+        { x: 1440, y: 1420 },
+        { x: 450, y: 1420 },
+        { x: 450, y: 1320 },
+        { x: 1380, y: 1320 },
+        { x: 1380, y: 520 },
+        { x: 1440, y: 520 },
       ];
       // ── 2. 상태 관리. setTimeout으로 캐릭터 상태를 덮어쓰지 않습니다. ──
       const canvas = document.getElementById("game"),
@@ -953,53 +1254,57 @@
           exhausted: false,
         },
         teacher: null,
+        camera: { x: 0, y: 0 },
+        successPopupUntil: 0,
+        successDigit: null,
       };
-      const imageSets = {},
-        teacherImageSets = {};
-      let spriteSheet = null;
-      function loadImages(definition, target) {
-        for (const [name, paths] of Object.entries(definition))
-          target[name] = paths.map((path) => {
+      const playerImages = {},
+        teacherImages = {};
+      let assetsReady = false,
+        missingAssets = [];
+      async function loadOriginalAssets(retry = false) {
+        assetsReady = false;
+        $("play-button").disabled = true;
+        $("asset-feedback").textContent = "원본 캐릭터 PNG를 확인하고 있어요.";
+        const entries = [
+          ...Object.entries(ASSET_PATHS.player).map(([name, path]) => ({
+            name,
+            path,
+            target: playerImages,
+          })),
+          ...Object.entries(ASSET_PATHS.teacher).map(([name, path]) => ({
+            name,
+            path,
+            target: teacherImages,
+          })),
+        ];
+        const results = await Promise.all(
+          entries.map(async (entry) => {
             const image = new Image();
-            image.onerror = () => {
-              image.dataset.failed = "true";
-            };
-            image.src = path;
-            return image;
-          });
+            entry.target[entry.name] = image;
+            image.src = entry.path + (retry ? `?reload=${Date.now()}` : "");
+            try {
+              await image.decode();
+              return null;
+            } catch {
+              return entry.path;
+            }
+          }),
+        );
+        missingAssets = results.filter(Boolean);
+        assetsReady = missingAssets.length === 0;
+        $("play-button").disabled = !assetsReady;
+        $("asset-status").textContent = assetsReady
+          ? "원본 PNG 캐릭터 적용됨"
+          : "원본 캐릭터 PNG 미준비";
+        $("asset-feedback").textContent = assetsReady
+          ? "원본 캐릭터 이미지 8개를 확인했어요."
+          : `원본 이미지 ${missingAssets.length}개가 없어 시작할 수 없어요. 원본 PNG 준비 후 다시 확인해 주세요.`;
       }
-      loadImages(CHARACTER_IMAGES, imageSets);
-      loadImages(TEACHER_IMAGES, teacherImageSets);
-      async function loadSheet(source) {
-        const image = new Image();
-        image.src = source;
-        await image.decode();
-        if (Math.abs(image.naturalWidth / image.naturalHeight - 1.5) > 0.08)
-          throw new Error(
-            "제공한 전체 시트와 같은 3:2 비율 이미지를 선택해 주세요.",
-          );
-        spriteSheet = image;
-        $("asset-status").textContent = "캐릭터 동작 시트 적용됨";
-        $("sheet-feedback").textContent =
-          "플레이어와 선생님의 동작 시트를 적용했어요.";
-      }
-      if (ASSET_PATHS.sheet)
-        loadSheet(ASSET_PATHS.sheet).catch(() => {
-          $("sheet-feedback").textContent =
-            "시트를 불러오지 못해 임시 캐릭터를 사용합니다.";
-        });
-      $("sheet-file").addEventListener("change", async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-        const url = URL.createObjectURL(file);
-        try {
-          await loadSheet(url);
-        } catch (error) {
-          $("sheet-feedback").textContent = error.message;
-        } finally {
-          URL.revokeObjectURL(url);
-        }
-      });
+      $("asset-retry").addEventListener("click", () =>
+        loadOriginalAssets(true),
+      );
+      const assetsPromise = loadOriginalAssets();
       function newTeacher() {
         return {
           ...PATROL[0],
@@ -1051,6 +1356,7 @@
         canvas.focus({ preventScroll: true });
       }
       function resetGame() {
+        if (!assetsReady) return;
         closeDialogs();
         clearInput();
         Object.assign(game, {
@@ -1069,6 +1375,8 @@
           message: "",
           messageUntil: 0,
           teacher: newTeacher(),
+          successPopupUntil: 0,
+          successDigit: null,
         });
         Object.assign(game.player, MAPS["2"].spawn, {
           state: STATES.IDLE,
@@ -1082,6 +1390,7 @@
           stamina: CONFIG.staminaMax,
           exhausted: false,
         });
+        snapCamera();
         focusGame();
       }
       function openMenu() {
@@ -1096,6 +1405,7 @@
         $("menu-dialog").showModal();
       }
       function resumeGame() {
+        if (!assetsReady) return;
         closeDialogs();
         game.phase = "playing";
         game.lastFrame = performance.now();
@@ -1126,9 +1436,10 @@
           game.yardEnteredAt = game.elapsed;
           game.teacher = newTeacher();
         }
+        snapCamera();
         say(
           id === "yard"
-            ? "운동장 도착! 5초 후 선생님이 순찰해요. 오른쪽 아래 교문으로 가세요."
+            ? "운동장 도착! 5초 후 선생님이 순찰해요. 아래쪽 중앙 교문으로 가세요."
             : `${id}층에 도착했어요. 문 앞에서 E를 눌러 보세요.`,
         );
         focusGame();
@@ -1192,6 +1503,7 @@
         } else if (object.type === "password") openPassword(object.target);
         else if (object.type === "stairs") enterMap(object.target);
         else if (object.type === "exit") finish("escaped");
+        else if (object.type === "inspect") say(object.description);
         else if (object.type === "npc")
           say("선생님이 순찰 중이에요. 장애물을 이용해 시선을 피해 보세요.");
       }
@@ -1220,6 +1532,9 @@
               return;
             }
             game.solved.add(quiz.id);
+            game.successDigit = quiz.digit;
+            game.successPopupUntil =
+              performance.now() / 1000 + CONFIG.successDuration;
             resumeGame();
             game.player.successUntil =
               performance.now() / 1000 + CONFIG.successDuration;
@@ -1382,7 +1697,14 @@
         );
       }
       function blocked(x, y, r = CONFIG.playerRadius, forTeacher = false) {
-        if (x - r < 24 || x + r > 976 || y - r < 24 || y + r > 616) return true;
+        const map = MAPS[game.map];
+        if (
+          x - r < 24 ||
+          x + r > map.width - 24 ||
+          y - r < 24 ||
+          y + r > map.height - 24
+        )
+          return true;
         return solids(forTeacher).some((o) => circleRect(x, y, r, o));
       }
       function landPlayer() {
@@ -1454,8 +1776,8 @@
       function findPath(from, to) {
         if (lineClear(from, to, CONFIG.teacherRadius)) return [{ ...to }];
         const cell = 24,
-          cols = 40,
-          rows = 24;
+          cols = Math.ceil((MAPS[game.map].width - 48) / 24),
+          rows = Math.ceil((MAPS[game.map].height - 48) / 24);
         const grid = (p) => ({
           x: Math.max(0, Math.min(cols - 1, Math.floor((p.x - 24) / cell))),
           y: Math.max(0, Math.min(rows - 1, Math.floor((p.y - 24) / cell))),
@@ -1533,6 +1855,11 @@
           t.path = [];
           t.repath = 0;
         }
+        if (t.mode === "SEARCH" && game.elapsed >= t.emotionUntil) {
+          t.mode = "PATROL";
+          t.path = [];
+          t.repath = 0;
+        }
         let goal =
           t.mode === "CHASE"
             ? p
@@ -1549,7 +1876,7 @@
           (distance < 18 || (!t.path.length && t.repath > 0))
         ) {
           t.searchWait -= dt;
-          if (t.searchWait <= 0) {
+          if (t.searchWait <= 0 && game.elapsed >= t.emotionUntil) {
             t.mode = "PATROL";
             t.path = [];
             t.repath = 0;
@@ -1604,6 +1931,7 @@
               path: [],
               repath: 0,
             });
+            snapCamera();
             game.phase = "playing";
             say("다시 출발! 잠깐 동안 선생님에게 들키지 않아요.");
           }
@@ -1655,121 +1983,48 @@
         if (game.map === "yard") updateTeacher(dt);
         resolveState(now);
       }
-      // ── 5. 이미지 프레임 선택. 개별 PNG 또는 제공한 전체 안내 시트 중 선택 ──
+      // ── 5. 원본 PNG 렌더링. 비율을 유지하며 위치 변화/반전만 사용 ──
       function readyImage(image) {
-        return (
-          image &&
-          image.complete &&
-          image.naturalWidth > 0 &&
-          !image.dataset.failed
-        );
+        return image && image.complete && image.naturalWidth > 0;
       }
-      function playerAnimationName() {
+      function spriteFrame() {
         const p = game.player;
-        if (p.state === STATES.CAUGHT) return "caught";
-        if (p.state === STATES.JUMP) return "jump";
-        if (p.state === STATES.QUIZ_SUCCESS) return "quizSuccess";
-        if (p.state === STATES.MOVE)
-          return p.facing === "left" || p.facing === "right"
-            ? "moveRight"
-            : p.facing === "up"
-              ? "moveUp"
-              : "moveDown";
-        return "idle";
+        const name =
+          p.state === STATES.CAUGHT
+            ? "caught"
+            : p.state === STATES.JUMP
+              ? "jump"
+              : p.state === STATES.QUIZ_SUCCESS
+                ? "success"
+                : p.state === STATES.MOVE
+                  ? "walk"
+                  : "idle";
+        return readyImage(playerImages[name]) ? playerImages[name] : null;
       }
-      function spriteFrame(now) {
-        const p = game.player,
-          name = playerAnimationName(),
-          elapsed = Math.max(0, now - p.stateSince);
-        let frames = imageSets[name];
-        if (!frames.length && name === "moveUp") frames = imageSets.moveDown;
-        const rects = SHEET_FRAMES[name],
-          count = frames.length || (spriteSheet ? rects.length : 0);
-        if (!count) return null;
-        let index;
-        if (name === "jump")
-          index = Math.min(
-            count - 1,
-            Math.floor(((p.jumpTime || 0) / CONFIG.jumpDuration) * count),
-          );
-        else if (name === "caught")
-          index = Math.min(
-            count - 1,
-            Math.floor((elapsed / CONFIG.caughtDuration) * count),
-          );
-        else if (name === "quizSuccess") index = 0;
-        else
-          index =
-            Math.floor(
-              elapsed * (name.startsWith("move") ? (p.running ? 12 : 7) : 3),
-            ) % count;
-        if (frames.length)
-          return readyImage(frames[index])
-            ? { image: frames[index], rect: null }
-            : null;
-        return { image: spriteSheet, rect: rects[index] };
+      function teacherFrame() {
+        const name =
+          game.teacher.emotion === "caught"
+            ? "caught"
+            : game.teacher.emotion === "lost"
+              ? "lost"
+              : "patrol";
+        return readyImage(teacherImages[name]) ? teacherImages[name] : null;
       }
-      function teacherFrame(now) {
-        const t = game.teacher,
-          name = t.emotion,
-          frames = teacherImageSets[name];
-        const rects =
-          SHEET_FRAMES[
-            name === "caught"
-              ? "teacherCaught"
-              : name === "lost"
-                ? "teacherLost"
-                : "teacherNormal"
-          ];
-        const count = frames.length || (spriteSheet ? rects.length : 0);
-        if (!count) return null;
-        const age =
-          name === "normal"
-            ? now
-            : Math.max(0, 2 - (t.emotionUntil - game.elapsed));
-        const index =
-          name === "normal"
-            ? Math.floor(age * 7) % count
-            : Math.min(count - 1, Math.floor((age / 2) * count));
-        return frames.length
-          ? readyImage(frames[index])
-            ? { image: frames[index], rect: null }
-            : null
-          : { image: spriteSheet, rect: rects[index] };
+      function drawFrame(image, height) {
+        const width = (height * image.naturalWidth) / image.naturalHeight;
+        ctx.drawImage(image, -width / 2, -height, width, height);
       }
-      function drawFrame(frame, height) {
-        if (frame.rect) {
-          const scale = frame.image.naturalWidth / 1536,
-            [x, y, w, h] = frame.rect;
-          ctx.drawImage(
-            frame.image,
-            x * scale,
-            y * scale,
-            w * scale,
-            h * scale,
-            (-height * w) / h / 2,
-            -height,
-            (height * w) / h,
-            height,
-          );
-        } else {
-          const width =
-            (height * frame.image.naturalWidth) / frame.image.naturalHeight;
-          ctx.drawImage(frame.image, -width / 2, -height, width, height);
-        }
-      }
-      // ── 6. 타일풍 맵. 그림과 충돌에 같은 벽/문 데이터를 사용 ──
       function box(x, y, w, h, color, radius = 0) {
         ctx.fillStyle = color;
         ctx.beginPath();
-        ctx.roundRect(Math.round(x), Math.round(y), w, h, radius);
+        ctx.roundRect(x, y, w, h, radius);
         ctx.fill();
       }
-      function text(value, x, y, size = 14, color = "#64795b", align = "left") {
+      function text(value, x, y, size = 14, color = "#334f58", align = "left") {
         ctx.fillStyle = color;
-        ctx.font = `600 ${size}px "Malgun Gothic",system-ui,sans-serif`;
+        ctx.font = `700 ${size}px "Malgun Gothic",system-ui,sans-serif`;
         ctx.textAlign = align;
-        ctx.fillText(value, Math.round(x), Math.round(y));
+        ctx.fillText(value, x, y);
       }
       function ellipse(x, y, rx, ry, color) {
         ctx.fillStyle = color;
@@ -1777,187 +2032,455 @@
         ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
         ctx.fill();
       }
-      function tileFloor(color, line) {
-        box(0, 0, 1000, 640, color);
-        ctx.strokeStyle = line;
-        ctx.lineWidth = 1;
-        for (let x = 24; x < 980; x += 32) {
-          ctx.beginPath();
-          ctx.moveTo(x, 24);
-          ctx.lineTo(x, 616);
-          ctx.stroke();
-        }
-        for (let y = 24; y < 620; y += 32) {
-          ctx.beginPath();
-          ctx.moveTo(24, y);
-          ctx.lineTo(976, y);
-          ctx.stroke();
+      function snapCamera() {
+        const map = MAPS[game.map];
+        game.camera.x = Math.max(
+          0,
+          Math.min(map.width - CONFIG.width, game.player.x - CONFIG.width / 2),
+        );
+        game.camera.y = Math.max(
+          0,
+          Math.min(
+            map.height - CONFIG.height,
+            game.player.y - CONFIG.height / 2,
+          ),
+        );
+      }
+      function updateCamera(dt) {
+        const map = MAPS[game.map],
+          p = game.player,
+          targetX = Math.max(
+            0,
+            Math.min(map.width - CONFIG.width, p.x - CONFIG.width / 2),
+          ),
+          targetY = Math.max(
+            0,
+            Math.min(map.height - CONFIG.height, p.y - CONFIG.height / 2),
+          );
+        const a = 1 - Math.exp(-9 * dt);
+        game.camera.x += (targetX - game.camera.x) * a;
+        game.camera.y += (targetY - game.camera.y) * a;
+      }
+      function garland(x, y, w) {
+        ctx.strokeStyle = "#135b42";
+        ctx.lineWidth = 14;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        for (let xx = x; xx <= x + w; xx += 12)
+          ctx.lineTo(xx, y + Math.sin((xx - x) / 65) * 9);
+        ctx.stroke();
+        for (let xx = x + 12, i = 0; xx < x + w; xx += 35, i++) {
+          ellipse(
+            xx,
+            y + Math.sin((xx - x) / 65) * 9 + 8,
+            4,
+            6,
+            ["#ffdb68", "#f48080", "#8ed9f1"][i % 3],
+          );
         }
       }
-      function drawSchool() {
+      function wreath(x, y, r = 17) {
+        ctx.strokeStyle = "#24724c";
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.stroke();
+        ellipse(x - 6, y - r + 1, 8, 5, "#c84350");
+        ellipse(x + 6, y - r + 1, 8, 5, "#c84350");
+        ellipse(x + 3, y + r, 3, 3, "#ffdf74");
+      }
+      function christmasTree(o) {
+        const x = o.x,
+          y = o.y,
+          w = o.w,
+          h = o.h;
+        box(x + w * 0.44, y + h * 0.72, w * 0.13, h * 0.28, "#7d5a4b");
+        for (let i = 0; i < 3; i++) {
+          const cy = y + i * h * 0.19;
+          ctx.fillStyle = ["#206b4c", "#287e59", "#318e67"][i];
+          ctx.beginPath();
+          ctx.moveTo(x + w / 2, cy);
+          ctx.lineTo(x + w * (0.03 + i * 0.02), cy + h * 0.53);
+          ctx.lineTo(x + w * (0.97 - i * 0.02), cy + h * 0.53);
+          ctx.closePath();
+          ctx.fill();
+          box(x + w * 0.2, cy + h * 0.4, w * 0.6, 5, "#f6fbff", 4);
+        }
+        for (const [dx, dy, c] of [
+          [0.38, 0.36, "#f5ca58"],
+          [0.64, 0.52, "#ef7180"],
+          [0.34, 0.65, "#a9e0f0"],
+          [0.65, 0.76, "#f5ca58"],
+        ])
+          ellipse(x + w * dx, y + h * dy, 4, 4, c);
+        text("✦", x + w / 2, y + 4, 19, "#ffe28b", "center");
+      }
+      function floorTiles(map) {
+        box(0, 0, map.width, map.height, "#d9e7e9");
+        box(32, 32, map.width - 64, map.height - 64, "#ead2bb");
+        ctx.strokeStyle = "#d5b8a1";
+        ctx.lineWidth = 1;
+        for (let x = 32; x < map.width; x += 48) {
+          ctx.beginPath();
+          ctx.moveTo(x, 32);
+          ctx.lineTo(x, map.height - 32);
+          ctx.stroke();
+        }
+        for (let y = 32; y < map.height; y += 48) {
+          ctx.beginPath();
+          ctx.moveTo(32, y);
+          ctx.lineTo(map.width - 32, y);
+          ctx.stroke();
+        }
+        box(30, 574, map.width - 60, 198, "#efd9c9");
+        text("복도", 880, 690, 23, "#c5a997", "center");
+      }
+      function furniture(o) {
+        const { x, y, w, h, kind } = o;
+        box(x + 3, y + 6, w, h, "#27425520", 3);
+        if (kind === "tree") {
+          christmasTree(o);
+          return;
+        }
+        if (kind === "wall") {
+          box(x, y, w, h, "#c39570");
+          box(x, y, w, 5, "#f6e4c9");
+          return;
+        }
+        if (kind === "door") {
+          if (!game.solved.has(o.door)) {
+            box(x, y, w, h, "#467e70");
+            box(x + 7, y + 4, w - 14, 4, "#d0e5cd");
+          } else box(x, y, w, h, "#eff1dc");
+          return;
+        }
+        if (kind === "piano") {
+          box(x, y, w, h, "#263642", 14);
+          box(x + 12, y + 12, w - 24, 65, "#445564", 12);
+          for (let i = 0; i < 13; i++) {
+            box(x + 8 + i * 11, y + h - 44, 10, 36, "#fff9e6");
+            if (i % 3 !== 0) box(x + 14 + i * 11, y + h - 44, 6, 20, "#18242e");
+          }
+          return;
+        }
+        if (kind === "score") {
+          box(x + w / 2 - 3, y + 16, 6, h - 12, "#57626b");
+          box(x, y, w, 25, "#fff9e8", 2);
+          for (let i = 0; i < 4; i++)
+            box(x + 5, y + 5 + i * 4, w - 10, 1, "#a0a4a4");
+          ellipse(x + 13, y + 13, 3, 3, "#42515b");
+          return;
+        }
+        if (kind === "instrument") {
+          box(x + w / 2 - 4, y, 8, h * 0.6, "#bd915f");
+          ellipse(x + w / 2, y + h * 0.7, w / 2, h * 0.29, "#cb8654");
+          ellipse(x + w / 2, y + h * 0.68, 5, 5, "#574436");
+          return;
+        }
+        if (kind === "board") {
+          box(x, y, w, h, "#285e4c");
+          box(x + 8, y + 6, w - 16, 2, "#c6e1bc");
+          return;
+        }
+        if (kind === "desk" || kind === "office") {
+          box(x, y, w, h - 15, "#bb854f", 4);
+          box(x + 4, y + 4, w - 8, h - 25, "#e8ba7c", 3);
+          box(x + w * 0.3, y + h - 13, w * 0.4, 13, "#487d6c", 3);
+          box(x + 12, y + 15, 27, 18, "#fff8df");
+          if (kind === "office") {
+            box(x + w - 64, y + 12, 50, 30, "#3e5d69", 3);
+            box(x + w - 59, y + 17, 40, 19, "#83c7dc");
+            box(x + w - 52, y + 46, 30, 6, "#d9e2db");
+          }
+          return;
+        }
+        if (kind === "sink") {
+          box(x, y, w, h, "#98bfc8", 4);
+          box(x + 7, y + 9, w - 14, h - 19, "#f8fbff", 5);
+          box(x + w / 2 - 4, y + 4, 8, 18, "#7a9fa9");
+          return;
+        }
+        if (kind === "stall") {
+          box(x, y, w, h, "#c4d6da");
+          box(x + 4, y + 4, w - 8, h - 20, "#eef6fa");
+          ellipse(x + w / 2, y + h * 0.5, 17, 25, "#fff");
+          box(x, y + h - 14, w, 14, "#9cbcc4");
+          box(x + w - 16, y + h - 10, 6, 6, "#597c83");
+          return;
+        }
+        if (kind === "books" || kind === "files") {
+          box(x, y, w, h, "#aa7c4d");
+          for (let xx = x + 8, i = 0; xx < x + w - 7; xx += 11, i++)
+            box(xx, y + 8, 8, h - 15, ["#b9585d", "#77a8a2", "#efcb77"][i % 3]);
+          return;
+        }
+        if (kind === "treadmill") {
+          box(x, y, w, h, "#687c8c", 5);
+          box(x + 13, y + 30, w - 26, h - 42, "#293d4d");
+          box(x + 10, y + 8, w - 20, 20, "#a2d1d8");
+          for (let yy = y + 42; yy < y + h - 16; yy += 14)
+            box(x + 20, yy, w - 40, 2, "#496071");
+          return;
+        }
+        if (kind === "weights") {
+          box(x, y, w, h, "#bdc8d1", 4);
+          for (let i = 0; i < 3; i++) {
+            box(x + 15 + i * 30, y + 22, 25, 6, "#556b78");
+            box(x + 14 + i * 30, y + 12, 7, 26, "#344c5c");
+            box(x + 33 + i * 30, y + 12, 7, 26, "#344c5c");
+          }
+          return;
+        }
+        if (kind === "mat") {
+          box(x, y, w, h, "#c47db3", 7);
+          box(x + 7, y + 7, w - 14, h - 14, "#e0afd5", 4);
+          return;
+        }
+        if (kind === "lab") {
+          box(x, y, w, h, "#688f9c", 5);
+          box(x + 5, y + 5, w - 10, h - 16, "#d7ebea", 3);
+          for (let i = 0; i < 3; i++) {
+            box(x + 23 + i * 45, y + 20, 20, 38, "#f7fcff", 3);
+            box(
+              x + 25 + i * 45,
+              y + 39,
+              16,
+              16,
+              ["#8abfd5", "#e899aa", "#a8c98a"][i],
+            );
+          }
+          return;
+        }
+        if (kind === "model") {
+          box(x + w / 2 - 3, y, 6, h, "#c7b49f");
+          ellipse(x + w / 2, y + 15, 13, 16, "#fcf5de");
+          box(x + 4, y + 38, w - 8, 44, "#ede4cc", 7);
+          for (let i = 0; i < 4; i++)
+            box(x + 8, y + 43 + i * 8, w - 16, 2, "#b6aa96");
+          return;
+        }
+        if (kind === "shelf") {
+          box(x, y, w, h, "#a47b54", 3);
+          for (let row = 0; row < 3; row++) {
+            box(x + 5, y + row * 42 + 38, w - 10, 6, "#edd0a0");
+            for (let col = 0; col < 4; col++)
+              box(
+                x + 10 + col * 23,
+                y + row * 42 + 8,
+                15,
+                25,
+                ["#e77c82", "#e9c65f", "#82b697", "#a39acc"][(row + col) % 4],
+                2,
+              );
+          }
+          return;
+        }
+        if (kind === "fridge") {
+          box(x, y, w, h, "#a5c9d6", 5);
+          box(x + 8, y + 9, w - 16, h - 22, "#dceff4", 2);
+          for (let i = 0; i < 4; i++)
+            box(x + 13, y + 25 + i * 32, w - 26, 3, "#94b4c5");
+          box(x + w - 13, y + h * 0.45, 5, 26, "#597e8c");
+          return;
+        }
+        if (kind === "counter") {
+          box(x, y, w, h, "#c48455", 4);
+          box(x + 4, y + 4, w - 8, h - 13, "#efc597");
+          box(x + w - 65, y + 10, 49, 28, "#3c6161", 4);
+          box(x + w - 60, y + 13, 39, 18, "#a9e0dc");
+          return;
+        }
+        if (kind === "bench") {
+          box(x, y, w, h, "#bb814e", 4);
+          box(x + 5, y + 5, w - 10, 6, "#e0b480");
+          box(x + 5, y + h - 8, w - 10, 4, "#f4e1c6");
+          return;
+        }
+        if (kind === "goal") {
+          box(x, y, w, h, "#fafcff");
+          ctx.strokeStyle = "#8bb6c1";
+          ctx.lineWidth = 1;
+          for (let yy = y + 8; yy < y + h; yy += 12) {
+            ctx.beginPath();
+            ctx.moveTo(x + 4, yy);
+            ctx.lineTo(x + w - 4, yy);
+            ctx.stroke();
+          }
+          return;
+        }
+        if (kind === "building") {
+          box(x, y, w, h, "#d1a06c", 6);
+          box(x + 8, y + 8, w - 16, h - 16, "#efd6a7", 4);
+          box(x - 7, y - 9, w + 14, 34, "#f4fbff", 9);
+          box(x + 25, y + 60, w - 50, h - 140, "#6ca6c1", 3);
+          for (let xx = x + 60; xx < x + w - 30; xx += 55)
+            box(xx, y + 60, 4, h - 140, "#d5edf1");
+          box(x + w / 2 - 29, y + h - 65, 58, 65, "#507d70", 3);
+          text(o.label, x + w / 2, y + 45, 23, "#5b614b", "center");
+          wreath(x + w / 2, y + h - 33, 13);
+          return;
+        }
+      }
+      function drawSchool(now) {
         const map = MAPS[game.map];
-        tileFloor("#f1e5c8", "#e7d9ba");
-        box(24, 279, 952, 130, "#f8efd6");
-        box(414, 24, 172, 592, "#f8efd6");
+        floorTiles(map);
         for (const room of map.rooms) {
           box(
-            room.x + 12,
-            room.y + 12,
-            room.w - 24,
-            room.h - 24,
-            room.quizId % 2 === 0 ? "#e5e7ce" : "#e8e3cb",
+            room.x + 16,
+            room.y + 16,
+            room.w - 32,
+            room.h - 32,
+            room.theme === "toilet" ? "#daeaf0" : "#e3c797",
           );
+          ctx.strokeStyle = "#cdb18b";
+          ctx.lineWidth = 1;
+          for (let yy = room.y + 30; yy < room.y + room.h - 16; yy += 24) {
+            ctx.beginPath();
+            ctx.moveTo(room.x + 16, yy);
+            ctx.lineTo(room.x + room.w - 16, yy);
+            ctx.stroke();
+          }
+          box(room.x + room.w / 2 - 110, room.y + 28, 220, 35, "#fff8df", 6);
           text(
             room.name,
             room.x + room.w / 2,
-            room.y + 35,
-            16,
-            "#82906b",
+            room.y + 52,
+            19,
+            "#3a5b56",
             "center",
           );
-        }
-        for (const o of map.obstacles) {
-          if (o.door !== undefined) {
-            if (!game.solved.has(o.door)) {
-              box(o.x, o.y, o.w, o.h, "#a5b68c");
-              box(o.x + 4, o.y + 2, o.w - 8, 3, "#d9dfb8");
-            } else {
-              box(o.x, o.y, o.w, o.h, "#e7edc9");
-              text("✓", o.x + o.w / 2, o.y + 10, 12, "#6b945b", "center");
-            }
-            continue;
-          }
-          if (o.kind === "desk") {
-            box(o.x + 2, o.y + 4, o.w, o.h, "#b9b195");
-            box(o.x, o.y, o.w, o.h - 4, "#cbb48a");
-            box(o.x + 5, o.y + 4, o.w - 10, 7, "#e0cfaa");
-            box(o.x + 12, o.y + 13, 20, 14, "#fbf5db");
-          } else if (o.kind === "sink") {
-            box(o.x, o.y, o.w, o.h, "#c1d1cc");
-            box(o.x + 7, o.y + 8, o.w - 14, o.h - 19, "#edf2e6");
-            box(o.x + o.w / 2 - 3, o.y + 6, 6, 13, "#8aadaa");
-          } else if (o.kind === "piano") {
-            box(o.x, o.y, o.w, o.h, "#667869");
-            for (let x = o.x + 8; x < o.x + o.w - 8; x += 12) {
-              box(x, o.y + 24, 10, 22, "#f7f4dc");
-              box(x + 7, o.y + 24, 5, 11, "#4f6355");
-            }
-          } else if (o.kind === "shelf") {
-            box(o.x, o.y, o.w, o.h, "#bcaa80");
-            for (let j = 0; j < 3; j++)
-              box(
-                o.x + 8 + j * 15,
-                o.y + 9,
-                9,
-                20,
-                ["#c4cf92", "#e2b097", "#9ebdb3"][j],
-              );
-          } else {
-            box(o.x + 2, o.y + 4, o.w, o.h, "#b7bc9c");
-            box(o.x, o.y, o.w, o.h, "#cbd0b0");
-            box(o.x, o.y, o.w, 4, "#e2e5ca");
+          garland(room.x + 15, room.y + 8, room.w - 30);
+          const object = map.objects.find((o) => o.label === room.name);
+          if (object && room.quizId !== undefined) {
+            box(
+              object.x - 40,
+              object.y - 16,
+              80,
+              28,
+              game.solved.has(room.quizId) ? "#d9eecf" : "#fff3d0",
+              5,
+            );
+            text(
+              game.solved.has(room.quizId)
+                ? "✓ 완료"
+                : `${ORDINALS[QUIZZES[room.quizId].slot]}`,
+              object.x,
+              object.y + 3,
+              13,
+              "#47735c",
+              "center",
+            );
           }
         }
-        // 계단/정문은 벽 사이의 별도 상호작용 지점입니다.
-        box(455, 41, 90, 84, "#c4d1bc");
-        for (let j = 0; j < 5; j++) box(462, 48 + j * 13, 76, 5, "#a3b29c");
+        for (const o of map.obstacles) furniture(o);
+        box(62, 626, 136, 112, "#9aafc0", 4);
+        for (let j = 0; j < 7; j++) box(70, 635 + j * 13, 120, 6, "#e2eced");
         text(
-          game.map === "2" ? "1F ↓" : "2F ↑",
-          500,
-          144,
-          14,
-          "#6b8365",
+          game.map === "2" ? "1층 ↓" : "2층 ↑",
+          130,
+          773,
+          18,
+          "#527e8f",
           "center",
         );
         if (game.map === "1") {
-          box(459, 565, 82, 43, "#8fa89a");
-          box(464, 569, 72, 33, "#c6d5bf");
-          box(497, 569, 4, 34, "#8fa89a");
-          text("정문 ↓", 500, 551, 14, "#6d8867", "center");
+          box(812, 1340, 136, 58, "#538c82", 5);
+          box(820, 1348, 120, 44, "#b9e0dd", 3);
+          box(877, 1348, 5, 44, "#538c82");
+          text("중앙 출입구", 880, 1319, 19, "#53826f", "center");
         }
-        text("복도", 500, 347, 17, "#c0bda3", "center");
+        // 빈 공간에만 장식. 경로를 가리지 않는 벽면 리스와 조명.
+        for (let x = 260; x < map.width - 100; x += 280) {
+          wreath(x, 62, 16);
+          ellipse(x, 48, 4, 4, "#f0cb67");
+        }
       }
-      function drawYard() {
-        tileFloor("#c4d4a0", "#c0d09a");
-        box(66, 77, 155, 160, "#e5dcb9");
-        box(61, 65, 168, 21, "#9db78d");
-        text("학교 출입구", 144, 110, 13, "#77916b", "center");
-        box(270, 157, 456, 302, "#d5c394");
-        box(282, 169, 432, 278, "#bdd098");
-        ctx.strokeStyle = "#edf0ce";
-        ctx.lineWidth = 3;
-        ctx.strokeRect(300, 185, 396, 246);
-        ctx.beginPath();
-        ctx.moveTo(498, 185);
-        ctx.lineTo(498, 431);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(498, 308, 52, 0, Math.PI * 2);
-        ctx.stroke();
-        text("운동장", 498, 394, 15, "#94aa7f", "center");
-        box(72, 522, 867, 75, "#e4d6b3");
-        box(858, 527, 104, 66, "#eee5c9");
-        text("교문 →", 910, 568, 15, "#7c956b", "center");
-        for (const o of MAPS.yard.obstacles) {
-          if (o.kind === "hedge") {
-            box(o.x + 2, o.y + 5, o.w, o.h, "#92a575");
-            box(o.x, o.y, o.w, o.h - 4, "#8fb077");
-            for (let x = o.x + 6; x < o.x + o.w - 8; x += 16)
-              box(x, o.y + 4, 9, 7, "#bad19b");
-          } else {
-            box(o.x + 5, o.y + 12, 8, 13, "#9c9f77");
-            box(o.x + o.w - 13, o.y + 12, 8, 13, "#9c9f77");
-            box(o.x, o.y, o.w, o.h, "#b6a77b");
-            box(o.x + 3, o.y + 3, o.w - 6, 4, "#d8c89c");
-          }
+      function drawYard(now) {
+        const map = MAPS.yard;
+        box(0, 0, map.width, map.height, "#d5e8f1");
+        box(90, 100, 130, 1475, "#f2dfc6", 35);
+        box(1360, 90, 160, 1510, "#e5bca8", 40);
+        box(120, 1465, 1740, 130, "#f0d4b9", 35);
+        box(205, 260, 1180, 900, "#da8595", 180);
+        for (let i = 0; i < 4; i++) {
+          ctx.strokeStyle = "#fbe5e3";
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.roundRect(
+            220 + i * 17,
+            275 + i * 17,
+            1150 - i * 34,
+            870 - i * 34,
+            170 - i * 12,
+          );
+          ctx.stroke();
         }
-        text("낮은 벤치 · Space", 171, 288, 11, "#8b9a75", "center");
+        box(300, 350, 980, 700, "#36825d", 30);
+        ctx.strokeStyle = "#d8efd5";
+        ctx.lineWidth = 4;
+        ctx.strokeRect(335, 383, 910, 635);
+        ctx.beginPath();
+        ctx.moveTo(790, 383);
+        ctx.lineTo(790, 1018);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(790, 700, 100, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.strokeRect(335, 535, 150, 320);
+        ctx.strokeRect(1095, 535, 150, 320);
+        ellipse(660, 820, 14, 14, "#fffdf2");
+        ellipse(660, 820, 6, 6, "#364653");
+        text("눈빛 운동장", 790, 470, 25, "#b6d7b1", "center");
+        box(80, 80, 250, 80, "#6596a3", 4);
+        box(70, 58, 270, 35, "#f6fbff", 10);
+        text("학교 출입구", 205, 129, 22, "#edf8fa", "center");
+        for (const o of map.obstacles) furniture(o);
+        // 정문을 실제 객체와 같은 위치에 표시합니다.
+        box(800, 1560, 280, 68, "#6e8da3");
+        box(780, 1533, 42, 115, "#bb8d72");
+        box(1058, 1533, 42, 115, "#bb8d72");
+        box(774, 1522, 55, 20, "#f9fcff", 6);
+        box(1050, 1522, 55, 20, "#f9fcff", 6);
+        for (let x = 830; x < 1050; x += 17) box(x, 1570, 5, 57, "#dbe7ed");
+        wreath(940, 1573, 22);
+        text("학교 정문 · E", 940, 1517, 22, "#4a6c79", "center");
+        for (let x = 350; x < 1300; x += 210) {
+          box(x, 120, 160, 54, "#9cb6c7", 4);
+          for (let j = 0; j < 3; j++)
+            box(x + 4, 125 + j * 14, 152, 6, "#f7fbff");
+        }
+        for (let i = 0; i < 65; i++) {
+          const x = (i * 367 + 31) % map.width,
+            y = (i * 173 + now * 7) % map.height;
+          ellipse(x, y, 2, 2, "#ffffffb0");
+        }
         const t = game.teacher;
         if (game.elapsed - game.yardEnteredAt >= 5) {
-          ctx.fillStyle = t.mode === "CHASE" ? "#edb19d27" : "#dfcd9827";
+          ctx.fillStyle = t.mode === "CHASE" ? "#e8807c22" : "#eccc7720";
           ctx.beginPath();
           ctx.arc(t.x, t.y, CONFIG.detectionRadius, 0, Math.PI * 2);
           ctx.fill();
-          ctx.strokeStyle = "#b6a78670";
-          ctx.setLineDash([5, 7]);
-          ctx.lineWidth = 1;
-          ctx.stroke();
-          ctx.setLineDash([]);
         } else
           text(
             `순찰까지 ${Math.max(0, Math.ceil(5 - (game.elapsed - game.yardEnteredAt)))}초`,
             t.x,
-            t.y - 91,
-            13,
-            "#a28f67",
+            t.y - 90,
+            17,
+            "#806b5a",
             "center",
           );
-        drawTeacher(performance.now() / 1000);
+        drawTeacher(now);
       }
       function drawTeacher(now) {
         const t = game.teacher,
-          frame = teacherFrame(now);
-        ellipse(t.x, t.y + 2, 22, 8, "#596e4c35");
+          image = teacherFrame();
+        if (!image) return;
+        ellipse(t.x, t.y + 3, 22, 8, "#38576c33");
         ctx.save();
         ctx.translate(t.x, t.y);
-        if (frame) {
-          if (
-            (ASSET_PATHS.teacherFacesLeft && t.facing === "right") ||
-            (!ASSET_PATHS.teacherFacesLeft && t.facing === "left")
-          )
-            ctx.scale(-1, 1);
-          drawFrame(frame, 61);
-        } else {
-          if (t.facing === "right") ctx.scale(-1, 1);
-          box(-19, -47, 38, 40, "#d6ba83", 6);
-          box(-15, -52, 30, 9, "#847a54", 3);
-          box(-20, -14, 40, 16, "#eff1d6", 3);
-          box(-22, -20, 44, 6, "#3f574b", 2);
-          box(-14, -38, 10, 7, "#3e5142", 2);
-          box(5, -38, 10, 7, "#3e5142", 2);
-          box(-17, -24, 7, 4, "#d9977e");
-          box(11, -24, 7, 4, "#d9977e");
-        }
+        if (ASSET_PATHS.teacherFacesLeft && t.facing === "right")
+          ctx.scale(-1, 1);
+        drawFrame(image, 66);
         ctx.restore();
         text(
           t.emotion === "caught"
@@ -1966,142 +2489,138 @@
               ? "어디 갔지?"
               : "선생님",
           t.x,
-          t.y - 70,
-          12,
-          t.emotion === "normal" ? "#8b8261" : "#b77f63",
+          t.y - 78,
+          14,
+          "#8c4f56",
           "center",
         );
       }
       function drawPlayer(now) {
-        const p = game.player;
-        const lift =
-          p.jumpTime === null
-            ? 0
-            : Math.sin((Math.PI * p.jumpTime) / CONFIG.jumpDuration) *
-              CONFIG.jumpHeight;
-        const isMoving =
-          p.state === STATES.MOVE || (p.state === STATES.JUMP && p.moving);
-        const gait = isMoving ? Math.sin(now * (p.running ? 21 : 12)) : 0;
-        const bob =
-          p.state === STATES.IDLE
-            ? Math.sin(now * 3) * 1.2
-            : Math.abs(gait) * 2;
-        ellipse(p.x, p.y + 3, Math.max(9, 18 - lift / 8), 7, "#6e805c35");
+        const p = game.player,
+          image = spriteFrame();
+        if (!image) return;
+        const lift = jumpLift(),
+          bob = p.moving ? Math.sin(now * (p.running ? 18 : 12)) * 1.5 : 0;
+        ellipse(p.x, p.y + 3, Math.max(9, 18 - lift / 8), 7, "#38576c33");
         ctx.save();
         ctx.translate(p.x, p.y - lift - bob);
-        if (p.state === STATES.CAUGHT)
-          ctx.translate(Math.sin(now * 40) * 2.5, 0);
-        const image = spriteFrame(now);
-        if (image) {
-          if (
-            p.facing === "left" &&
-            (p.state === STATES.MOVE || p.state === STATES.JUMP)
-          )
-            ctx.scale(-1, 1);
-          drawFrame(image, 58);
-        } else {
-          // 외부 파일 없는 임시 고양이. 좌/우는 동일 원본을 반전하고 위쪽은 뒷모습 표시.
-          if (p.facing === "left") ctx.scale(-1, 1);
-          const side = p.facing === "left" || p.facing === "right";
-          ellipse(12, -9, 11, 6, "#709eaf");
-          ctx.lineWidth = 2.5;
-          ctx.strokeStyle = "#142b38";
-          for (const [x, offset] of [
-            [-9, gait * 3],
-            [9, -gait * 3],
-          ]) {
-            ctx.fillStyle = "#e8eee4";
-            ctx.beginPath();
-            ctx.ellipse(x, -1 + offset, 6, 5, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-          }
-          ctx.fillStyle = "#edf2e6";
-          ctx.beginPath();
-          ctx.moveTo(-19, -28);
-          ctx.quadraticCurveTo(-25, -43, -17, -53);
-          ctx.quadraticCurveTo(-13, -57, -4, -43);
-          ctx.quadraticCurveTo(4, -45, 8, -43);
-          ctx.quadraticCurveTo(21, -59, 23, -48);
-          ctx.lineTo(24, -31);
-          ctx.bezierCurveTo(37, -8, 17, 3, 0, 1);
-          ctx.bezierCurveTo(-24, 3, -33, -15, -19, -28);
-          ctx.fill();
-          ctx.stroke();
-          ctx.fillStyle = "#7ca5b6";
-          ctx.beginPath();
-          ctx.moveTo(-19, -30);
-          ctx.lineTo(-17, -50);
-          ctx.lineTo(-4, -39);
-          ctx.quadraticCurveTo(3, -42, 9, -39);
-          ctx.lineTo(21, -50);
-          ctx.lineTo(23, -29);
-          ctx.quadraticCurveTo(8, -25, 2, -33);
-          ctx.quadraticCurveTo(-8, -24, -19, -30);
-          ctx.fill();
-          if (
-            p.facing !== "up" ||
-            p.state === STATES.CAUGHT ||
-            p.state === STATES.QUIZ_SUCCESS
-          ) {
-            const offset = side ? 6 : 0;
-            ellipse(-9 + offset, -23, 2.2, 3, "#172b35");
-            ellipse(10 + offset, -23, 2.2, 3, "#172b35");
-            ellipse(-15 + offset, -17, 4, 2, "#e6a299");
-            ellipse(16 + offset, -17, 4, 2, "#e6a299");
-            ctx.strokeStyle = "#172b35";
-            ctx.lineWidth = 1.8;
-            ctx.beginPath();
-            ctx.arc(0 + offset, -19, 3, 0, Math.PI);
-            ctx.stroke();
-            if (p.state === STATES.CAUGHT) {
-              text("!", 3, -65, 24, "#f4b69b", "center");
-              box(0, -37, 2, 7, "#6e9aab");
-              box(5, -37, 2, 9, "#6e9aab");
-            }
-          } else {
-            ellipse(1, -7, 5, 6, "#7ca5b6");
-          }
-        }
-        if (p.state === STATES.QUIZ_SUCCESS) {
-          text("✧", -34, -42, 24, "#f2cb78", "center");
-          text("✧", 34, -35, 24, "#f2cb78", "center");
-          text("정답!", 0, -72, 14, "#d1edaa", "center");
-        }
+        if (
+          p.facing === "left" &&
+          (p.state === STATES.MOVE || p.state === STATES.JUMP)
+        )
+          ctx.scale(-1, 1);
+        drawFrame(image, 62);
         ctx.restore();
-        text("나", p.x, p.y + 24, 11, "#72896b", "center");
+      }
+      function drawMiniMap() {
+        const map = MAPS[game.map],
+          w = 188,
+          h = (map.height / map.width) * w,
+          x = CONFIG.width - w - 14,
+          y = 14,
+          scale = w / map.width;
+        ctx.save();
+        box(x - 7, y - 7, w + 14, h + 14, "#f6fbfff0", 10);
+        ctx.translate(x, y);
+        ctx.scale(scale, scale);
+        box(
+          0,
+          0,
+          map.width,
+          map.height,
+          game.map === "yard" ? "#cce2df" : "#eadac7",
+        );
+        for (const o of map.obstacles)
+          box(o.x, o.y, o.w, o.h, o.kind === "wall" ? "#b08d6d" : "#81a99a");
+        for (const o of map.objects) {
+          const complete = o.type === "quiz" && game.solved.has(o.quizId);
+          ellipse(
+            o.x,
+            o.y,
+            65,
+            65,
+            complete ? "#8fa780" : o.type === "quiz" ? "#fff4bf" : "#8cbdce",
+          );
+          if (o.type === "quiz")
+            text(
+              String(QUIZZES[o.quizId].slot + 1),
+              o.x,
+              o.y + 12,
+              120,
+              "#385d56",
+              "center",
+            );
+        }
+        ellipse(game.player.x, game.player.y, 35, 35, "#c9445a");
+        ctx.lineWidth = 10;
+        ctx.strokeStyle = "#52778c";
+        ctx.strokeRect(
+          game.camera.x,
+          game.camera.y,
+          CONFIG.width,
+          CONFIG.height,
+        );
+        ctx.restore();
+        text(
+          "안내도 · 숫자는 퀴즈 순서",
+          x + w / 2,
+          y + h + 22,
+          10,
+          "#507078",
+          "center",
+        );
       }
       function drawMap(now) {
-        ctx.imageSmoothingEnabled = false;
-        if (game.map === "yard") drawYard();
-        else drawSchool();
-        // 맵 바깥 경계는 플레이어/선생님 모두 통과할 수 없습니다.
+        ctx.imageSmoothingEnabled = true;
+        ctx.clearRect(0, 0, CONFIG.width, CONFIG.height);
+        ctx.save();
+        ctx.translate(-game.camera.x, -game.camera.y);
+        if (game.map === "yard") drawYard(now);
+        else drawSchool(now);
+        const map = MAPS[game.map];
         for (const [x, y, w, h] of [
-          [12, 12, 976, 12],
-          [12, 616, 976, 12],
-          [12, 12, 12, 616],
-          [976, 12, 12, 616],
-        ]) {
-          box(x + 2, y + 4, w, h, "#99aa87");
-          box(x, y, w, h, "#acbc95");
-        }
+          [8, 8, map.width - 16, 16],
+          [8, map.height - 24, map.width - 16, 16],
+          [8, 8, 16, map.height - 16],
+          [map.width - 24, 8, 16, map.height - 16],
+        ])
+          box(x, y, w, h, "#6f9eae");
         ctx.save();
         if (game.elapsed < game.player.invincibleUntil)
-          ctx.globalAlpha = Math.sin(now * 22) > 0.1 ? 0.45 : 1;
+          ctx.globalAlpha = Math.sin(now * 22) > 0.1 ? 0.4 : 1;
         drawPlayer(now);
         ctx.restore();
         const target = game.phase === "playing" ? nearestObject() : null;
         if (target) {
-          box(target.x - 31, target.y + 17, 62, 23, "#fcf9e5", 4);
-          text("[E] 확인", target.x, target.y + 33, 11, "#64845d", "center");
+          box(target.x - 33, target.y + 22, 66, 27, "#fff9e9", 4);
+          text("[E] 확인", target.x, target.y + 41, 12, "#367458", "center");
         }
+        ctx.restore();
+        drawMiniMap();
         if (game.phase === "caught") {
-          ctx.fillStyle = "#edac9320";
-          ctx.fillRect(0, 0, 1000, 640);
-          text("선생님에게 걸렸다!", 500, 330, 27, "#b77861", "center");
+          ctx.fillStyle = "#dd858c22";
+          ctx.fillRect(0, 0, CONFIG.width, CONFIG.height);
+          text(
+            "선생님에게 걸렸다!",
+            CONFIG.width / 2,
+            CONFIG.height / 2,
+            29,
+            "#b64c64",
+            "center",
+          );
         }
       }
       function updateUI(now) {
+        const popup = $("success-popup");
+        popup.hidden = now >= game.successPopupUntil;
+        $("success-digit").textContent =
+          `비밀번호 숫자: ${game.successDigit ?? ""}`;
+        for (const floor of ["2", "1"])
+          $("bottom-code-" + floor).textContent = QUIZZES.filter(
+            (q) => q.floor === floor,
+          )
+            .map((q) => (game.solved.has(q.id) ? q.digit : "?"))
+            .join(" ");
         const remaining = Math.max(
           0,
           Math.ceil(CONFIG.duration - game.elapsed),
@@ -2127,7 +2646,7 @@
         $("floor-label").textContent = floorNames[game.map];
         $("map-detail").textContent =
           game.map === "yard"
-            ? "오른쪽 아래 교문에서 E"
+            ? "아래쪽 중앙 교문에서 E"
             : `퀴즈 ${QUIZZES.filter((q) => q.floor === game.map && game.solved.has(q.id)).length} / 4`;
         for (const id of ["2", "1", "yard"]) {
           $("route-" + id).classList.toggle("active", game.map === id);
@@ -2192,6 +2711,7 @@
           update(dt, now);
           remaining -= dt;
         }
+        updateCamera(Math.min(delta, 0.25));
         drawMap(now);
         updateUI(now);
         requestAnimationFrame(frame);
