@@ -1,0 +1,2890 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>야자탈출 · Chapter 03</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #3d5546;
+        --muted: #81917f;
+        --line: #d7dfc9;
+        --paper: #fffcf2;
+        --green: #68866a;
+        --mint: #e5edce;
+        --gold: #f3db99;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #eef2e5;
+        color: var(--ink);
+        font-family:
+          "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+      }
+      button,
+      input {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      a {
+        color: inherit;
+      }
+      button:focus-visible,
+      a:focus-visible,
+      canvas:focus-visible,
+      input:focus-visible {
+        outline: 3px solid #deaa61;
+        outline-offset: 4px;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .shell {
+        max-width: 1240px;
+        margin: auto;
+        padding: 24px 32px;
+      }
+      .topline {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        padding-bottom: 17px;
+        border-bottom: 1px solid var(--line);
+      }
+      .brand {
+        font-weight: 900;
+        color: #68876d;
+      }
+      .topline a {
+        text-decoration: none;
+        color: #849078;
+      }
+      .heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 22px 0 20px;
+      }
+      .eyebrow {
+        font-size: 10px;
+        letter-spacing: 0.15em;
+        color: #8b9b77;
+        font-weight: 800;
+      }
+      h1 {
+        margin: 4px 0;
+        font-size: 34px;
+        letter-spacing: -0.05em;
+      }
+      .subtitle {
+        margin: 5px 0 0;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .quiet {
+        background: var(--paper);
+        border: 1px solid #bccbae;
+        border-bottom: 3px solid #bccbae;
+        border-radius: 9px;
+        color: #61795c;
+        padding: 10px 15px;
+        font-size: 12px;
+      }
+      .quiet:hover {
+        background: #fff;
+      }
+      .hud {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 17px 22px;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px #899d6d0a;
+      }
+      .hud-item {
+        font-size: 10px;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+      }
+      .hud-item b {
+        display: block;
+        font-size: 22px;
+        margin-top: 4px;
+        color: var(--ink);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.04em;
+      }
+      .hud-item #hearts {
+        color: #d88b86;
+        letter-spacing: 0.12em;
+      }
+      .passwords {
+        display: flex;
+        gap: 14px;
+      }
+      .passwords b {
+        font-size: 17px;
+        letter-spacing: 0.2em;
+      }
+      .hud-item .urgent {
+        color: #cb6d5d;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 208px;
+        gap: 18px;
+        align-items: start;
+      }
+      .stage {
+        border: 2px solid #b6c3a2;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #f4ecd6;
+        box-shadow: 0 8px 0 #a7b88e16;
+      }
+      .stage-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background: #e1e8d0;
+        border-bottom: 1px solid #b6c3a2;
+        font-size: 11px;
+      }
+      .stage-bar b {
+        font-size: 12px;
+      }
+      .stage-bar span {
+        color: #7b8a6e;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 25/16;
+        image-rendering: pixelated;
+        outline: none;
+      }
+      .stage-note {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 13px 16px;
+        min-height: 45px;
+        background: var(--paper);
+        font-size: 11px;
+        border-top: 1px solid #d2dbbd;
+      }
+      .stage-note > span:first-child {
+        color: #82956a;
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+      }
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #f8faed;
+        padding: 19px;
+        margin-bottom: 14px;
+      }
+      .card h2 {
+        font-size: 14px;
+        margin: 8px 0 17px;
+      }
+      .route-step {
+        font-size: 12px;
+        color: #93a085;
+        padding: 11px 0;
+        border-bottom: 1px dashed #d5dec6;
+      }
+      .route-step:last-child {
+        border: 0;
+      }
+      .route-step.active {
+        color: #486a4f;
+        font-weight: 800;
+      }
+      .route-step.done {
+        color: #a3b78f;
+      }
+      .route-step span {
+        font-size: 10px;
+        display: inline-block;
+        width: 26px;
+      }
+      .tip {
+        font-size: 11px;
+        color: var(--muted);
+        line-height: 1.9;
+      }
+      .meter {
+        height: 6px;
+        background: #e1e6d2;
+        border-radius: 5px;
+        overflow: hidden;
+        margin: 9px 0;
+      }
+      .meter > span {
+        display: block;
+        height: 100%;
+        background: #adbf85;
+        width: 100%;
+      }
+      .status-line {
+        font-size: 10px;
+        display: flex;
+        justify-content: space-between;
+        color: #90a07d;
+        margin-top: 14px;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 13px 21px;
+        font-size: 10px;
+        color: var(--muted);
+        padding: 18px 0;
+      }
+      kbd {
+        font: inherit;
+        padding: 3px 6px;
+        border: 1px solid #c5d0b5;
+        border-bottom-width: 2px;
+        border-radius: 4px;
+        background: #fbfcf5;
+        color: #657d5e;
+        margin-right: 3px;
+      }
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        border-top: 1px solid var(--line);
+        padding-top: 14px;
+        font-size: 10px;
+        color: #95a087;
+      }
+      dialog {
+        width: min(520px, calc(100% - 32px));
+        max-height: calc(100% - 32px);
+        overflow: auto;
+        border: 2px solid #bfcca9;
+        border-radius: 19px;
+        padding: 30px;
+        background: var(--paper);
+        color: var(--ink);
+        box-shadow: 0 20px 80px #40574144;
+      }
+      dialog::backdrop {
+        background: #324e458c;
+        backdrop-filter: blur(5px);
+      }
+      dialog h2 {
+        font-size: 29px;
+        letter-spacing: -0.04em;
+        margin: 10px 0 12px;
+      }
+      dialog p {
+        font-size: 13px;
+        line-height: 1.9;
+        color: #849079;
+      }
+      .primary {
+        display: block;
+        width: 100%;
+        padding: 14px 20px;
+        background: #e3ebc6;
+        border: 1px solid #a7bb84;
+        border-bottom: 4px solid #a7bb84;
+        border-radius: 10px;
+        color: #49643b;
+        font-weight: 800;
+        font-size: 14px;
+      }
+      .primary:hover {
+        background: #edf3d6;
+      }
+      .dialog-secondary {
+        display: block;
+        width: 100%;
+        margin-top: 10px;
+        text-align: center;
+        text-decoration: none;
+      }
+      .help-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        font-size: 11px;
+        margin: 24px 0;
+        color: #82916f;
+      }
+      .choice {
+        display: block;
+        width: 100%;
+        background: #f5f4e6;
+        border: 1px solid #d5daba;
+        border-radius: 8px;
+        padding: 13px 16px;
+        text-align: left;
+        margin: 8px 0;
+        color: #546c49;
+        font-size: 13px;
+      }
+      .choice:hover {
+        background: #eaf0d9;
+        border-color: #a5bc8e;
+      }
+      .feedback {
+        color: #b97864 !important;
+        min-height: 23px;
+      }
+      .small-note {
+        font-size: 10px !important;
+        text-align: center;
+      }
+      .sheet-control {
+        display: block;
+        font-size: 11px;
+        margin: 18px 0;
+        color: #7e8f6e;
+      }
+      .sheet-control input {
+        display: block;
+        font-size: 11px;
+        width: 100%;
+        margin-top: 9px;
+      }
+      .password-input {
+        display: block;
+        width: 100%;
+        border: 2px solid #c6d2af;
+        background: #fffef8;
+        padding: 13px;
+        letter-spacing: 0.5em;
+        text-align: center;
+        font-size: 26px;
+        color: #566c48;
+        border-radius: 10px;
+      }
+      .intro-art {
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        font-size: 42px;
+        background: linear-gradient(135deg, #e7edd4, #f9eccc);
+        border-radius: 12px;
+        margin-bottom: 22px;
+      }
+      .cross {
+        color: #cc8470;
+        font-size: 30px;
+        display: block;
+        text-align: center;
+      }
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          display: flex;
+          gap: 12px;
+        }
+        .card {
+          flex: 1;
+        }
+        .hud {
+          flex-wrap: wrap;
+        }
+        .shell {
+          padding: 20px;
+        }
+        .passwords {
+          gap: 12px;
+        }
+        .sidebar .card:last-child {
+          display: none;
+        }
+      }
+      @media (max-width: 560px) {
+        .shell {
+          padding: 16px 10px;
+        }
+        .hud {
+          padding: 13px;
+          gap: 12px;
+        }
+        .hud-item b {
+          font-size: 19px;
+        }
+        .passwords b {
+          font-size: 14px;
+        }
+        .heading {
+          gap: 12px;
+        }
+        h1 {
+          font-size: 29px;
+        }
+        .subtitle {
+          font-size: 10px;
+        }
+        .sidebar {
+          display: none;
+        }
+        dialog {
+          padding: 23px;
+        }
+        .footer {
+          gap: 14px;
+          font-size: 9px;
+        }
+      }
+      @media (min-width: 901px) and (max-height: 900px) {
+        .shell {
+          max-width: min(1240px, calc((100dvh - 330px) * 1.5625 + 274px));
+          padding: 12px 24px;
+        }
+        .topline {
+          padding-bottom: 10px;
+        }
+        .heading {
+          margin: 12px 0;
+        }
+        h1 {
+          font-size: 28px;
+        }
+        .subtitle {
+          font-size: 11px;
+        }
+        .hud {
+          padding: 10px 16px;
+          margin-bottom: 12px;
+        }
+        .hud-item b {
+          font-size: 20px;
+        }
+        .passwords b {
+          font-size: 15px;
+        }
+        .stage-bar {
+          padding: 10px 14px;
+        }
+        .controls {
+          padding: 12px 0;
+          gap: 9px 13px;
+          font-size: 9px;
+        }
+        .card {
+          padding: 16px;
+        }
+        .sidebar .card:nth-child(2),
+        .footer {
+          display: none;
+        }
+      }
+      body {
+        background: linear-gradient(#1a3159, #254f65);
+        color: #234d46;
+      }
+      .shell {
+        background: #f5fbffee;
+      }
+      .brand {
+        color: #397661;
+      }
+      .stage {
+        position: relative;
+        border-color: #3d7970;
+      }
+      .stage-bar {
+        background: #21614f;
+        color: #fff6cf;
+      }
+      .stage-bar span {
+        color: #d6eee2;
+      }
+      .quiet {
+        background: #fff5d6;
+        border-color: #cfb478;
+      }
+      .primary {
+        background: #f6d589;
+        border-color: #c39149;
+        color: #6b411c;
+      }
+      .hud {
+        border-color: #b4ceca;
+      }
+      .code-strip {
+        display: flex;
+        justify-content: center;
+        gap: 34px;
+        background: #184f4c;
+        color: #eaf7ed;
+        border-radius: 10px;
+        padding: 10px;
+        font-size: 11px;
+      }
+      .code-strip b {
+        letter-spacing: 0.3em;
+        color: #ffe398;
+        margin-left: 12px;
+      }
+      .success-popup {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        padding: 25px 38px;
+        background: #fff7da;
+        border: 4px solid #edbc48;
+        border-radius: 18px;
+        box-shadow: 0 12px 45px #1b3b5580;
+        pointer-events: none;
+        text-align: center;
+        z-index: 2;
+        min-width: 280px;
+      }
+      .success-popup b {
+        display: block;
+        color: #c34c51;
+        font-size: 42px;
+      }
+      .success-popup span {
+        display: block;
+        font-size: 22px;
+        font-weight: 900;
+        color: #32644a;
+        margin-top: 8px;
+      }
+      .intro-art {
+        font-size: 13px;
+        font-weight: 900;
+        letter-spacing: 0.18em;
+        color: #246852;
+        background: linear-gradient(120deg, #e6f1ff, #fae7bc);
+      }
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+      }
+      @media (min-width: 901px) and (max-height: 900px) {
+        .code-strip {
+          padding: 6px;
+        }
+        .shell {
+          max-width: min(1240px, calc((100dvh - 360px) * 1.5625 + 274px));
+        }
+      }
+      @media (min-width: 901px) and (max-height: 900px) {
+        .heading {
+          margin: 7px 0;
+        }
+        .heading .eyebrow,
+        .heading .subtitle {
+          display: none;
+        }
+        h1 {
+          font-size: 26px;
+          margin: 0;
+        }
+        .hud {
+          padding: 8px 14px;
+          margin-bottom: 10px;
+        }
+        .topline {
+          padding-bottom: 8px;
+        }
+      }
+      #asset-details {
+        margin-top: 14px;
+        color: #7e6a54;
+        font-size: 11px;
+      }
+      #asset-files {
+        font: 11px/1.8 monospace;
+        overflow-wrap: anywhere;
+        padding-left: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <nav class="topline">
+        <span class="brand">✿ SCHOOL ESCAPE / CHAPTER 03</span
+        ><a href="main.html#chapters">챕터 선택 ↗</a>
+      </nav>
+      <header class="heading">
+        <div>
+          <span class="eyebrow">AFTER THE LAST BELL</span>
+          <h1>야자탈출<span style="color: #b7c68a">.</span></h1>
+          <p class="subtitle">
+            8개의 과학 퀴즈를 풀고, 관리실에서 마지막 탈출문을 여세요!
+          </p>
+        </div>
+        <button class="quiet" id="pause-button" type="button">Ⅱ 메뉴</button>
+      </header>
+      <section class="hud" aria-label="게임 진행 상황">
+        <div class="hud-item">
+          남은 시간<b id="time-value" role="timer">01:30</b>
+        </div>
+        <div class="hud-item">
+          남은 기회<b id="hearts" aria-label="하트 3개">♥♥♥</b>
+        </div>
+        <div class="hud-item">잡힌 횟수<b id="caught-count">0회</b></div>
+        <div class="passwords">
+          <div class="hud-item">2층 비밀번호<b id="code-2">? ? ? ?</b></div>
+          <div class="hud-item">1층 비밀번호<b id="code-1">? ? ? ?</b></div>
+        </div>
+      </section>
+      <div class="layout">
+        <section class="stage" aria-label="게임 화면">
+          <div class="stage-bar">
+            <b id="floor-label">2층 · 과학 퀴즈와 계단</b
+            ><span id="map-detail">퀴즈 0 / 4</span>
+          </div>
+          <canvas
+            id="game"
+            width="1000"
+            height="640"
+            tabindex="0"
+            aria-label="야자탈출 탑다운 게임. WASD 이동, Shift 달리기, Space 점프, E 상호작용."
+            >Canvas를 지원하는 브라우저를 사용해 주세요.</canvas
+          >
+          <div class="success-popup" id="success-popup" role="status" hidden>
+            <b>정답!</b><span id="success-digit"></span>
+          </div>
+          <div class="stage-note" role="status">
+            <span>GUIDE</span
+            ><span id="hint">시작 버튼을 누르면 90초 타이머가 시작됩니다.</span>
+          </div>
+        </section>
+        <aside class="sidebar">
+          <section class="card">
+            <span class="eyebrow">ESCAPE ROUTE</span>
+            <h2>오늘의 탈출 경로</h2>
+            <div class="route-step active" id="route-2">
+              <span>01</span>2층 · 네 자리 모으기
+            </div>
+            <div class="route-step" id="route-1">
+              <span>02</span>1층 · 정문 열기
+            </div>
+            <div class="route-step" id="route-yard">
+              <span>03</span>운동장 · 선생님 피하기
+            </div>
+            <div class="route-step" id="route-management">
+              <span>04</span>관리실 · 마지막 비밀번호
+            </div>
+          </section>
+          <section class="card">
+            <span class="eyebrow">A LITTLE HELP</span>
+            <p class="tip">
+              문 가까이에서 E를 누르세요. 정답을 맞히면 문이 열려요. 운동장 진입
+              5초 뒤 선생님이 순찰을 시작해요.
+            </p>
+            <p class="tip">
+              낮은 벤치는 점프로 넘을 수 있지만 벽과 울타리는 통과할 수 없어요.
+            </p>
+          </section>
+          <section class="card">
+            <span class="eyebrow">SPRINT ENERGY</span>
+            <div
+              class="meter"
+              role="meter"
+              aria-label="달리기 에너지"
+              aria-valuemin="0"
+              aria-valuemax="3"
+              aria-valuenow="3"
+              id="stamina-meter"
+            >
+              <span id="stamina-bar"></span>
+            </div>
+            <p class="tip">잠깐 달리고, 쉬면서 충전!</p>
+            <div class="status-line">
+              <span>플레이어</span><span id="state-label">IDLE</span>
+            </div>
+            <div class="status-line">
+              <span>선생님</span><span id="ai-label">대기</span>
+            </div>
+          </section>
+        </aside>
+      </div>
+      <div class="controls">
+        <span><kbd>WASD</kbd><kbd>↑↓←→</kbd> 이동</span
+        ><span><kbd>Shift</kbd> 달리기</span><span><kbd>Space</kbd> 점프</span
+        ><span><kbd>E</kbd> 상호작용</span><span><kbd>Esc</kbd> 메뉴</span
+        ><span>마우스 좌클릭 · 답안 / 버튼</span>
+      </div>
+      <div class="code-strip" aria-label="획득한 비밀번호">
+        <span>2층 <b id="bottom-code-2">? ? ? ?</b></span
+        ><span>1층 <b id="bottom-code-1">? ? ? ?</b></span>
+      </div>
+      <footer class="footer">
+        <span>2F → 1F → PLAYGROUND → MANAGEMENT</span
+        ><span id="asset-status">원본 캐릭터 PNG 확인 중</span>
+      </footer>
+    </main>
+    <dialog id="menu-dialog" aria-labelledby="menu-title">
+      <div class="intro-art" aria-hidden="true">CHRISTMAS NIGHT ESCAPE</div>
+      <span class="eyebrow">CHAPTER 03</span>
+      <h2 id="menu-title">야자탈출</h2>
+      <p id="menu-description">
+        90초 안에 두 층의 과학 퀴즈를 풀고 오른쪽 관리실의 탈출문을 여세요.
+        퀴즈와 비밀번호 창에서도 시간은 계속 흘러요. 메뉴에서는 일시정지됩니다.
+      </p>
+      <div class="help-grid">
+        <span><kbd>WASD</kbd> / 방향키 · 이동</span
+        ><span><kbd>Shift</kbd> + 이동 · 달리기</span
+        ><span><kbd>Space</kbd> 점프 / 낮은 벤치 넘기</span
+        ><span><kbd>E</kbd> 문 · 계단 · 퀴즈 · 출구</span
+        ><span>마우스 좌클릭 · 답안 선택</span
+        ><span><kbd>Esc</kbd> 메뉴 / 돌아가기</span>
+      </div>
+      <button class="primary" id="play-button" type="button">게임 시작 →</button
+      ><button
+        class="quiet dialog-secondary"
+        id="menu-restart"
+        type="button"
+        hidden
+      >
+        처음부터 다시 시작</button
+      ><a class="quiet dialog-secondary" href="main.html#chapters"
+        >챕터 선택으로 돌아가기</a
+      ><button id="asset-retry" class="quiet dialog-secondary" type="button">
+        원본 이미지 다시 확인
+      </button>
+      <p id="asset-feedback" class="small-note" role="status">
+        원본 캐릭터 PNG를 확인하고 있어요.
+      </p>
+      <details id="asset-details">
+        <summary>필요한 원본 이미지 파일</summary>
+        <ul id="asset-files"></ul>
+      </details>
+    </dialog>
+    <dialog id="quiz-dialog" aria-labelledby="quiz-title">
+      <span class="eyebrow" id="quiz-number"></span>
+      <h2 id="quiz-title"></h2>
+      <p id="quiz-question"></p>
+      <div id="quiz-choices"></div>
+      <p class="feedback" id="quiz-feedback" role="status"></p>
+      <button class="primary" id="quiz-retry" type="button" hidden>
+        다시 풀기</button
+      ><button class="quiet dialog-secondary" id="quiz-close" type="button">
+        나중에 풀기
+      </button>
+    </dialog>
+    <dialog id="password-dialog" aria-labelledby="password-title">
+      <span class="eyebrow">PASSWORD CHECK</span>
+      <h2 id="password-title"></h2>
+      <p id="password-help">
+        방에서 얻은 숫자를 첫 번째부터 네 번째 순서로 입력하세요.
+      </p>
+      <form id="password-form">
+        <label for="password-input" class="eyebrow">네 자리 비밀번호</label
+        ><input
+          class="password-input"
+          id="password-input"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]{4}"
+          maxlength="4"
+          autocomplete="off"
+          aria-describedby="password-feedback"
+          required
+        />
+        <p id="password-feedback" class="feedback" role="status"></p>
+        <button class="primary" type="submit">확인 →</button>
+      </form>
+      <button class="quiet dialog-secondary" id="password-close" type="button">
+        돌아가기
+      </button>
+    </dialog>
+    <dialog id="result-dialog" aria-labelledby="result-title">
+      <span class="eyebrow" id="result-caption"></span>
+      <h2 id="result-title"></h2>
+      <p id="result-description"></p>
+      <button class="primary" id="retry-button" type="button">재도전 →</button
+      ><a class="quiet dialog-secondary" href="main.html#chapters"
+        >챕터 선택으로 돌아가기</a
+      >
+    </dialog>
+    <script>
+      "use strict";
+      // ── 1. 변경하기 쉬운 게임/이미지 설정 ──
+      const CONFIG = Object.freeze({
+        width: 1000,
+        height: 640,
+        tileSize: 32,
+        duration: 90,
+        walkSpeed: 218.5,
+        runSpeed: 327.75,
+        playerRadius: 13,
+        teacherRadius: 17,
+        jumpDuration: 0.5,
+        jumpHeight: 40,
+        interactionDistance: 63,
+        successDuration: 2,
+        caughtDuration: 2,
+        invincibleDuration: 3,
+        staminaMax: 3,
+        detectionRadius: 210,
+      });
+      const STATES = Object.freeze({
+        IDLE: "IDLE",
+        MOVE: "MOVE",
+        JUMP: "JUMP",
+        CAUGHT: "CAUGHT",
+        QUIZ_SUCCESS: "QUIZ_SUCCESS",
+      });
+      // 원본에서 배경만 제거한 PNG만 사용합니다. 이미지가 없으면 시작을 차단합니다.
+      const ASSET_PATHS = {
+        player: {
+          idle: "assets/player/idle.png",
+          caught: "assets/player/caught.png",
+          jump: "assets/player/jump.png",
+          walk: "assets/player/walk.png",
+          success: "assets/player/success.png",
+        },
+        teacher: {
+          patrol: "assets/teacher/patrol.png",
+          caught: "assets/teacher/caught.png",
+          lost: "assets/teacher/lost.png",
+        },
+        teacherFacesLeft: true,
+      };
+      const QUIZZES = [
+        {
+          floor: "2",
+          room: "음악실",
+          question: "보통 1기압에서 물이 끓는 온도는?",
+          answers: ["0°C", "25°C", "100°C", "200°C"],
+          correct: 2,
+          digit: "7",
+        },
+        {
+          floor: "2",
+          room: "1학년 8반",
+          question: "원자에서 음전하를 띠는 입자는?",
+          answers: ["양성자", "전자", "중성자", "원자핵"],
+          correct: 1,
+          digit: "3",
+        },
+        {
+          floor: "2",
+          room: "1학년 9반",
+          question: "소리가 전달되기 가장 어려운 곳은?",
+          answers: ["공기", "물", "철", "진공"],
+          correct: 3,
+          digit: "1",
+        },
+        {
+          floor: "2",
+          room: "교무실",
+          question: "식물이 광합성할 때 주로 흡수하는 기체는?",
+          answers: ["산소", "질소", "이산화탄소", "헬륨"],
+          correct: 2,
+          digit: "8",
+        },
+        {
+          floor: "1",
+          room: "과학실",
+          question: "전류의 세기를 나타내는 단위는?",
+          answers: ["암페어(A)", "미터(m)", "초(s)", "켈빈(K)"],
+          correct: 0,
+          digit: "2",
+        },
+        {
+          floor: "1",
+          room: "매점",
+          question: "산성 용액의 일반적인 pH 범위는?",
+          answers: ["7보다 크다", "항상 7이다", "7보다 작다", "항상 14이다"],
+          correct: 2,
+          digit: "4",
+        },
+        {
+          floor: "1",
+          room: "체력단련실",
+          question: "물체가 운동 상태를 유지하려는 성질은?",
+          answers: ["증발", "굴절", "관성", "확산"],
+          correct: 2,
+          digit: "6",
+        },
+        {
+          floor: "1",
+          room: "화장실",
+          question: "지구가 태양 주위를 한 바퀴 도는 데 걸리는 시간은?",
+          answers: ["약 하루", "약 일주일", "약 한 달", "약 1년"],
+          correct: 3,
+          digit: "9",
+        },
+      ].map((q, index) => ({ ...q, id: index, slot: index % 4 }));
+      const ORDINALS = ["첫 번째", "두 번째", "세 번째", "네 번째"];
+      // 큰 월드와 화면 크기를 분리합니다. 각 방의 벽·문·가구는 실제 충돌 데이터입니다.
+      const FLOOR_ROOMS = {
+        2: [
+          {
+            name: "음악실",
+            x: 80,
+            y: 100,
+            w: 480,
+            h: 410,
+            doorX: 320,
+            top: true,
+            quizId: 0,
+            theme: "music",
+          },
+          {
+            name: "1학년 8반",
+            x: 640,
+            y: 100,
+            w: 480,
+            h: 410,
+            doorX: 880,
+            top: true,
+            quizId: 1,
+            theme: "classroom",
+          },
+          {
+            name: "1학년 9반",
+            x: 1200,
+            y: 100,
+            w: 480,
+            h: 410,
+            doorX: 1440,
+            top: true,
+            quizId: 2,
+            theme: "classroom",
+          },
+          {
+            name: "화장실",
+            x: 80,
+            y: 830,
+            w: 480,
+            h: 500,
+            doorX: 320,
+            top: false,
+            theme: "toilet",
+          },
+          {
+            name: "교무실",
+            x: 1200,
+            y: 830,
+            w: 480,
+            h: 500,
+            doorX: 1440,
+            top: false,
+            quizId: 3,
+            theme: "office",
+          },
+        ],
+        1: [
+          {
+            name: "체력단련실",
+            x: 80,
+            y: 100,
+            w: 650,
+            h: 460,
+            doorX: 405,
+            top: true,
+            quizId: 6,
+            theme: "gym",
+          },
+          {
+            name: "과학실",
+            x: 1030,
+            y: 100,
+            w: 650,
+            h: 460,
+            doorX: 1355,
+            top: true,
+            quizId: 4,
+            theme: "science",
+          },
+          {
+            name: "매점",
+            x: 80,
+            y: 870,
+            w: 650,
+            h: 460,
+            doorX: 405,
+            top: false,
+            quizId: 5,
+            theme: "shop",
+          },
+          {
+            name: "화장실",
+            x: 1030,
+            y: 870,
+            w: 650,
+            h: 460,
+            doorX: 1355,
+            top: false,
+            quizId: 7,
+            theme: "toilet",
+          },
+        ],
+      };
+      function furnish(room) {
+        const x = room.x,
+          y = room.y,
+          w = room.w,
+          h = room.h,
+          result = [];
+        const add = (dx, dy, ww, hh, kind, extra = {}) =>
+          result.push({ x: x + dx, y: y + dy, w: ww, h: hh, kind, ...extra });
+        switch (room.theme) {
+          case "music":
+            add(48, 105, 160, 140, "piano");
+            add(260, 126, 42, 42, "score");
+            add(338, 98, 34, 110, "instrument");
+            add(w - 132, 245, 84, 100, "instruments");
+            add(260, 240, 42, 42, "score");
+            break;
+          case "classroom":
+            add(100, 76, w - 200, 26, "board");
+            for (let row = 0; row < 3; row++)
+              for (let col = 0; col < 3; col++)
+                add(58 + col * 126, 106 + row * 87, 72, 58, "desk");
+            break;
+          case "toilet":
+            for (let i = 0; i < 3; i++) add(40, 90 + i * 95, 76, 60, "sink");
+            for (let i = 0; i < 3; i++)
+              add(w - 150, 80 + i * 104, 112, 90, "stall");
+            break;
+          case "office":
+            for (let row = 0; row < 2; row++)
+              for (let col = 0; col < 2; col++)
+                add(54 + col * 208, 110 + row * 150, 150, 90, "office");
+            add(32, h - 93, 130, 60, "files");
+            add(w - 105, h - 93, 66, 60, "books");
+            break;
+          case "gym":
+            for (let i = 0; i < 3; i++)
+              add(42 + i * 145, 120, 108, 118, "treadmill");
+            add(w - 150, 76, 108, 58, "weights");
+            add(w - 160, 230, 116, 78, "mat");
+            break;
+          case "science":
+            add(58, 124, 192, 92, "lab");
+            add(330, 124, 192, 92, "lab");
+            add(w - 90, 90, 34, 110, "model");
+            add(60, 285, 130, 65, "lab");
+            break;
+          case "shop":
+            for (let i = 0; i < 3; i++)
+              add(46 + i * 145, 110, 105, 136, "shelf");
+            add(w - 125, 80, 78, 170, "fridge");
+            add(70, h - 115, 215, 66, "counter");
+            break;
+        }
+        return result;
+      }
+      function makeFloor(floor) {
+        const obstacles = [],
+          objects = [],
+          rooms = FLOOR_ROOMS[floor].map((r) => ({ ...r }));
+        for (const room of rooms) {
+          const { x, y, w, h, doorX, top, quizId } = room,
+            doorY = top ? y + h - 16 : y;
+          obstacles.push(
+            { x, y, w: 16, h, kind: "wall" },
+            { x: x + w - 16, y, w: 16, h, kind: "wall" },
+            { x, y: top ? y : y + h - 16, w, h: 16, kind: "wall" },
+            { x, y: doorY, w: doorX - 44 - x, h: 16, kind: "wall" },
+            {
+              x: doorX + 44,
+              y: doorY,
+              w: x + w - doorX - 44,
+              h: 16,
+              kind: "wall",
+            },
+          );
+          if (quizId !== undefined)
+            obstacles.push({
+              x: doorX - 44,
+              y: doorY,
+              w: 88,
+              h: 16,
+              door: quizId,
+              kind: "door",
+            });
+          obstacles.push(...furnish(room));
+          objects.push({
+            id: quizId === undefined ? "toilet" : `quiz-${quizId}`,
+            type: quizId === undefined ? "inspect" : "quiz",
+            quizId,
+            x: doorX,
+            y: top ? doorY + 48 : doorY - 38,
+            label: room.name,
+            description:
+              "화장실이에요. 퀴즈 표지가 있는 네 방에서 비밀번호를 모으세요.",
+          });
+        }
+        obstacles.push({ x: 760, y: 1040, w: 80, h: 110, kind: "tree" });
+        objects.push({
+          id: "stairs",
+          type: floor === "2" ? "password" : "stairs",
+          x: 130,
+          y: 700,
+          label: floor === "2" ? "계단 · 1층으로" : "계단 · 2층으로",
+          target: floor === "2" ? "1" : "2",
+        });
+        if (floor === "1")
+          objects.push({
+            id: "front-door",
+            type: "password",
+            x: 880,
+            y: 1355,
+            label: "중앙 출입구 · 운동장으로",
+            target: "yard",
+          });
+        return {
+          id: floor,
+          name: `${floor}층`,
+          width: 1760,
+          height: 1440,
+          spawn: { x: 240, y: 690 },
+          obstacles,
+          objects,
+          rooms,
+        };
+      }
+      const yardObstacles = [
+        { x: 1540, y: 170, w: 300, h: 290, kind: "building", label: "관리실" },
+        { x: 1540, y: 620, w: 300, h: 220, kind: "building", label: "창고" },
+        { x: 300, y: 600, w: 35, h: 160, kind: "goal" },
+        { x: 1245, y: 600, w: 35, h: 160, kind: "goal" },
+        { x: 430, y: 1225, w: 130, h: 32, kind: "bench", low: true },
+        { x: 650, y: 1225, w: 130, h: 32, kind: "bench", low: true },
+        { x: 1640, y: 1100, w: 145, h: 32, kind: "bench", low: true },
+      ];
+      for (const [x, y] of [
+        [42, 350],
+        [42, 580],
+        [42, 840],
+        [42, 1100],
+        [165, 40],
+        [450, 40],
+        [760, 40],
+        [1080, 40],
+        [1370, 40],
+        [1850, 310],
+        [1850, 580],
+        [1850, 920],
+        [1850, 1200],
+        [1850, 1450],
+        [1550, 1480],
+        [300, 1530],
+      ])
+        yardObstacles.push({ x, y, w: 72, h: 85, kind: "tree" });
+      const MAPS = {
+        2: makeFloor("2"),
+        1: makeFloor("1"),
+        yard: {
+          id: "yard",
+          name: "운동장",
+          width: 1960,
+          height: 1680,
+          spawn: { x: 180, y: 170 },
+          rooms: [],
+          obstacles: yardObstacles,
+          objects: [
+            {
+              id: "gate",
+              type: "inspect",
+              description:
+                "정문은 잠겨 있어요. 오른쪽 관리실로 가서 1층 비밀번호로 탈출문을 여세요.",
+              x: 940,
+              y: 1590,
+              label: "학교 정문 · 관리실에서 잠금 해제",
+            },
+            {
+              id: "office-yard",
+              type: "door",
+              target: "management",
+              x: 1690,
+              y: 490,
+              label: "관리실 출입문",
+              description:
+                "불이 켜진 관리실이에요. 건물 뒤편은 선생님의 시야를 가려요.",
+            },
+            {
+              id: "store",
+              type: "inspect",
+              x: 1685,
+              y: 865,
+              label: "창고",
+              description: "창고 옆 보행로가 교문 쪽으로 이어져요.",
+            },
+          ],
+        },
+      };
+      // 관리실 내부도 실제 벽/가구가 있는 별도 공간입니다. 최종 비밀번호는 1층에서 얻은 네 자리입니다.
+      MAPS.management = {
+        id: "management",
+        name: "관리실",
+        width: 1000,
+        height: 800,
+        spawn: { x: 500, y: 650 },
+        rooms: [],
+        obstacles: [
+          { x: 80, y: 80, w: 840, h: 16, kind: "wall" },
+          { x: 80, y: 80, w: 16, h: 640, kind: "wall" },
+          { x: 904, y: 80, w: 16, h: 640, kind: "wall" },
+          { x: 80, y: 704, w: 376, h: 16, kind: "wall" },
+          { x: 544, y: 704, w: 376, h: 16, kind: "wall" },
+          { x: 150, y: 180, w: 220, h: 100, kind: "office" },
+          { x: 150, y: 440, w: 140, h: 80, kind: "files" },
+          { x: 750, y: 160, w: 120, h: 150, kind: "books" },
+          { x: 800, y: 355, w: 40, h: 58, kind: "keypad" },
+        ],
+        objects: [
+          {
+            id: "management-exit",
+            type: "password",
+            target: "escaped",
+            x: 866,
+            y: 430,
+            label: "관리실 탈출문 · 비밀번호",
+          },
+          {
+            id: "management-return",
+            type: "return",
+            target: "yard",
+            x: 500,
+            y: 706,
+            label: "운동장으로 돌아가기",
+          },
+        ],
+      };
+      const PATROL = [
+        { x: 1440, y: 1040 },
+        { x: 1440, y: 520 },
+        { x: 1440, y: 1420 },
+        { x: 450, y: 1420 },
+        { x: 450, y: 1320 },
+        { x: 1380, y: 1320 },
+        { x: 1380, y: 520 },
+      ];
+      // ── 2. 상태 관리. setTimeout으로 캐릭터 상태를 덮어쓰지 않습니다. ──
+      const canvas = document.getElementById("game"),
+        ctx = canvas.getContext("2d");
+      ctx.imageSmoothingEnabled = false;
+      const keys = new Set(),
+        $ = (id) => document.getElementById(id);
+      const game = {
+        phase: "ready",
+        map: "2",
+        elapsed: 0,
+        lastFrame: 0,
+        hearts: 3,
+        caughtCount: 0,
+        solved: new Set(),
+        unlocked: new Set(),
+        activeQuiz: null,
+        passwordTarget: null,
+        yardEnteredAt: 0,
+        caughtAt: 0,
+        message: "",
+        messageUntil: 0,
+        player: {
+          ...MAPS["2"].spawn,
+          state: STATES.IDLE,
+          stateSince: 0,
+          facing: "down",
+          moving: false,
+          running: false,
+          jumpTime: null,
+          successUntil: 0,
+          invincibleUntil: 0,
+          stamina: 3,
+          exhausted: false,
+        },
+        teacher: null,
+        yardReturn: { x: 1690, y: 510 },
+        camera: { x: 0, y: 0 },
+        successPopupUntil: 0,
+        successDigit: null,
+      };
+      const playerImages = {},
+        teacherImages = {};
+      let assetsReady = false,
+        missingAssets = [];
+      async function loadOriginalAssets(retry = false) {
+        assetsReady = false;
+        $("play-button").disabled = true;
+        $("asset-feedback").textContent = "원본 캐릭터 PNG를 확인하고 있어요.";
+        const entries = [
+          ...Object.entries(ASSET_PATHS.player).map(([name, path]) => ({
+            name,
+            path,
+            target: playerImages,
+          })),
+          ...Object.entries(ASSET_PATHS.teacher).map(([name, path]) => ({
+            name,
+            path,
+            target: teacherImages,
+          })),
+        ];
+        const results = await Promise.all(
+          entries.map(async (entry) => {
+            const image = new Image();
+            entry.target[entry.name] = image;
+            image.src = entry.path + (retry ? `?reload=${Date.now()}` : "");
+            try {
+              await image.decode();
+              return null;
+            } catch {
+              return entry.path;
+            }
+          }),
+        );
+        missingAssets = results.filter(Boolean);
+        $("asset-files").replaceChildren(
+          ...missingAssets.map((path) => {
+            const item = document.createElement("li");
+            item.textContent = path;
+            return item;
+          }),
+        );
+        $("asset-details").hidden = missingAssets.length === 0;
+        assetsReady = missingAssets.length === 0;
+        $("play-button").disabled = !assetsReady;
+        $("asset-status").textContent = assetsReady
+          ? "원본 PNG 캐릭터 적용됨"
+          : "원본 캐릭터 PNG 미준비";
+        $("asset-feedback").textContent = assetsReady
+          ? "원본 캐릭터 이미지 8개를 확인했어요."
+          : `원본 이미지 ${missingAssets.length}개가 없어 시작할 수 없어요. 원본 PNG 준비 후 다시 확인해 주세요.`;
+      }
+      $("asset-retry").addEventListener("click", () =>
+        loadOriginalAssets(true),
+      );
+      const assetsPromise = loadOriginalAssets();
+      function newTeacher() {
+        return {
+          ...PATROL[0],
+          mode: "WAIT",
+          waypoint: 1,
+          facing: "left",
+          emotion: "normal",
+          emotionUntil: 0,
+          lastSeen: null,
+          searchWait: 0,
+          path: [],
+          repath: 0,
+        };
+      }
+      game.teacher = newTeacher();
+      function setState(state, now) {
+        if (game.player.state !== state) {
+          game.player.state = state;
+          game.player.stateSince = now;
+        }
+      }
+      function clearInput() {
+        keys.clear();
+        game.player.moving = false;
+        game.player.running = false;
+      }
+      function resolveState(now) {
+        const p = game.player;
+        if (
+          game.phase === "caught" ||
+          (game.phase === "failed" && game.hearts === 0)
+        )
+          return setState(STATES.CAUGHT, now);
+        if (p.jumpTime !== null) return setState(STATES.JUMP, now);
+        if (p.moving) return setState(STATES.MOVE, now);
+        if (now < p.successUntil) return setState(STATES.QUIZ_SUCCESS, now);
+        setState(STATES.IDLE, now);
+      }
+      function say(message, seconds = 2.5) {
+        game.message = message;
+        game.messageUntil = performance.now() / 1000 + seconds;
+      }
+      function closeDialogs() {
+        document
+          .querySelectorAll("dialog[open]")
+          .forEach((dialog) => dialog.close());
+      }
+      function focusGame() {
+        canvas.focus({ preventScroll: true });
+      }
+      function resetGame() {
+        if (!assetsReady) return;
+        closeDialogs();
+        clearInput();
+        Object.assign(game, {
+          phase: "playing",
+          map: "2",
+          elapsed: 0,
+          lastFrame: performance.now(),
+          hearts: 3,
+          caughtCount: 0,
+          solved: new Set(),
+          unlocked: new Set(),
+          activeQuiz: null,
+          passwordTarget: null,
+          yardEnteredAt: 0,
+          caughtAt: 0,
+          message: "",
+          messageUntil: 0,
+          teacher: newTeacher(),
+          yardReturn: { x: 1690, y: 510 },
+          successPopupUntil: 0,
+          successDigit: null,
+        });
+        Object.assign(game.player, MAPS["2"].spawn, {
+          state: STATES.IDLE,
+          stateSince: performance.now() / 1000,
+          facing: "down",
+          moving: false,
+          running: false,
+          jumpTime: null,
+          successUntil: 0,
+          invincibleUntil: 0,
+          stamina: CONFIG.staminaMax,
+          exhausted: false,
+        });
+        snapCamera();
+        focusGame();
+      }
+      function openMenu() {
+        if (game.phase !== "playing") return;
+        game.phase = "paused";
+        clearInput();
+        $("menu-title").textContent = "잠깐, 쉬어가기";
+        $("menu-description").textContent =
+          "메뉴에서는 시간과 선생님의 움직임이 멈춰요. 준비되면 이어서 탈출하세요.";
+        $("play-button").textContent = "계속하기 →";
+        $("menu-restart").hidden = false;
+        $("menu-dialog").showModal();
+      }
+      function resumeGame() {
+        if (!assetsReady) return;
+        closeDialogs();
+        game.phase = "playing";
+        game.lastFrame = performance.now();
+        clearInput();
+        focusGame();
+      }
+      function finish(kind) {
+        game.phase = kind;
+        clearInput();
+        game.player.jumpTime = null;
+        closeDialogs();
+        const won = kind === "escaped";
+        $("result-caption").textContent = won ? "ESCAPE COMPLETE" : "TRY AGAIN";
+        $("result-title").textContent = won ? "야자탈출 성공!" : "게임 실패";
+        $("result-description").textContent =
+          `${won ? "관리실 탈출문을 열었어요." : game.hearts === 0 ? "하트 3개를 모두 잃었어요." : "90초가 지났어요."} 소요 시간 ${game.elapsed.toFixed(1)}초 · 선생님에게 잡힌 횟수 ${game.caughtCount}회`;
+        $("result-dialog").showModal();
+      }
+      function enterMap(id) {
+        const previous = game.map;
+        game.map = id;
+        clearInput();
+        const spawn =
+          id === "yard" && previous === "management"
+            ? game.yardReturn
+            : MAPS[id].spawn;
+        Object.assign(game.player, spawn, {
+          jumpTime: null,
+          successUntil: 0,
+          facing: "down",
+        });
+        if (id === "yard" && previous !== "management") {
+          game.yardEnteredAt = game.elapsed;
+          game.teacher = newTeacher();
+        }
+        snapCamera();
+        say(
+          id === "yard"
+            ? "오른쪽 보행로를 따라 관리실 출입문으로 가세요."
+            : id === "management"
+              ? "관리실 도착! 1층에서 모은 네 자리로 오른쪽 탈출문을 여세요."
+              : `${id}층에 도착했어요. 문 앞에서 E를 눌러 보세요.`,
+        );
+        focusGame();
+      }
+      function caught(now) {
+        if (
+          game.phase !== "playing" ||
+          game.elapsed < game.player.invincibleUntil
+        )
+          return;
+        game.hearts--;
+        game.caughtCount++;
+        game.caughtAt = game.elapsed;
+        game.phase = "caught";
+        clearInput();
+        Object.assign(game.player, { jumpTime: null, successUntil: 0 });
+        Object.assign(game.teacher, {
+          mode: "RECOVER",
+          emotion: "caught",
+          emotionUntil: game.elapsed + 2,
+        });
+        setState(STATES.CAUGHT, now);
+        say("선생님에게 걸렸다!", 2);
+        if (game.hearts <= 0) finish("failed");
+      }
+      // ── 3. 퀴즈 / 비밀번호 / 입력 ──
+      function nearestObject() {
+        const object = MAPS[game.map].objects
+          .filter(
+            (o) =>
+              Math.hypot(o.x - game.player.x, o.y - game.player.y) <=
+              CONFIG.interactionDistance,
+          )
+          .sort(
+            (a, b) =>
+              Math.hypot(a.x - game.player.x, a.y - game.player.y) -
+              Math.hypot(b.x - game.player.x, b.y - game.player.y),
+          )[0];
+        // 문/출구 상호작용을 우선하고, 가까운 NPC 안내 기능도 유지합니다.
+        if (object) return object;
+        if (
+          game.map === "yard" &&
+          Math.hypot(
+            game.teacher.x - game.player.x,
+            game.teacher.y - game.player.y,
+          ) <= CONFIG.interactionDistance
+        )
+          return { ...game.teacher, type: "npc", label: "라코 선생님" };
+      }
+      function interact() {
+        const object = nearestObject();
+        if (!object) return say("조금 더 가까이 다가가서 E를 눌러 주세요.");
+        if (game.player.jumpTime !== null)
+          return say("착지한 다음에 다시 확인해 보세요.");
+        if (object.type === "quiz") {
+          if (game.solved.has(object.quizId))
+            return say(
+              "이미 완료한 방이에요. 숫자는 상단에서 확인할 수 있어요.",
+            );
+          openQuiz(object.quizId);
+        } else if (object.type === "password") openPassword(object.target);
+        else if (object.type === "stairs" || object.type === "return")
+          enterMap(object.target);
+        else if (object.type === "door") {
+          if (game.map === "yard")
+            game.yardReturn = { x: object.x, y: object.y + 20 };
+          enterMap(object.target);
+        } else if (object.type === "exit") finish("escaped");
+        else if (object.type === "inspect") say(object.description);
+        else if (object.type === "npc")
+          say("선생님이 순찰 중이에요. 장애물을 이용해 시선을 피해 보세요.");
+      }
+      function showQuizChoices() {
+        const quiz = game.activeQuiz,
+          choices = $("quiz-choices");
+        choices.replaceChildren();
+        $("quiz-feedback").textContent = "";
+        $("quiz-retry").hidden = true;
+        quiz.answers.forEach((answer, index) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "choice";
+          button.textContent = `${index + 1}. ${answer}`;
+          button.addEventListener("click", () => {
+            if (game.phase !== "quiz" || game.solved.has(quiz.id)) return;
+            if (index !== quiz.correct) {
+              choices.replaceChildren();
+              const cross = document.createElement("span");
+              cross.className = "cross";
+              cross.textContent = "✕";
+              choices.append(cross);
+              $("quiz-feedback").textContent = "아쉬워요! 다시 풀어 보세요.";
+              $("quiz-retry").hidden = false;
+              $("quiz-retry").focus();
+              return;
+            }
+            game.solved.add(quiz.id);
+            game.successDigit = quiz.digit;
+            game.successPopupUntil =
+              performance.now() / 1000 + CONFIG.successDuration;
+            resumeGame();
+            game.player.successUntil =
+              performance.now() / 1000 + CONFIG.successDuration;
+            resolveState(performance.now() / 1000);
+            say(`정답! ${ORDINALS[quiz.slot]} 비밀번호는 ${quiz.digit}입니다.`);
+          });
+          choices.append(button);
+        });
+      }
+      function openQuiz(id) {
+        game.activeQuiz = QUIZZES[id];
+        game.phase = "quiz";
+        clearInput();
+        $("quiz-number").textContent =
+          `${game.map}층 · ${ORDINALS[game.activeQuiz.slot]} 비밀번호`;
+        $("quiz-title").textContent = game.activeQuiz.room + " 과학 퀴즈";
+        $("quiz-question").textContent = game.activeQuiz.question;
+        showQuizChoices();
+        $("quiz-dialog").showModal();
+      }
+      function passwordQuizzes() {
+        return QUIZZES.filter(
+          (q) => q.floor === (game.map === "management" ? "1" : game.map),
+        );
+      }
+      function openPassword(target) {
+        game.phase = "password";
+        game.passwordTarget = target;
+        clearInput();
+        $("password-title").textContent =
+          target === "escaped"
+            ? "관리실 · 마지막 탈출문"
+            : target === "1"
+              ? "계단 · 1층으로"
+              : "정문 · 운동장으로";
+        $("password-help").textContent =
+          target === "escaped"
+            ? "1층에서 모은 첫 번째부터 네 번째 숫자를 입력하세요. 같은 네 자리 비밀번호입니다."
+            : "이 층에서 얻은 숫자를 첫 번째부터 네 번째 순서로 입력하세요.";
+        $("password-input").value = "";
+        $("password-feedback").textContent = "";
+        $("password-dialog").showModal();
+        $("password-input").focus();
+      }
+      $("password-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (game.phase !== "password") return;
+        const quizzes = passwordQuizzes(),
+          required = game.passwordTarget === "escaped" ? QUIZZES : quizzes;
+        if (!required.every((q) => game.solved.has(q.id))) {
+          $("password-feedback").textContent =
+            game.passwordTarget === "escaped"
+              ? "먼저 두 층의 퀴즈 8개를 모두 풀어 주세요."
+              : "먼저 이 층의 퀴즈 4개를 모두 풀어 주세요.";
+          return;
+        }
+        if (
+          $("password-input").value !== quizzes.map((q) => q.digit).join("")
+        ) {
+          $("password-feedback").textContent =
+            "비밀번호가 달라요. 상단 숫자를 보고 다시 입력해 주세요.";
+          $("password-input").select();
+          return;
+        }
+        const target = game.passwordTarget;
+        if (target === "escaped") {
+          finish("escaped");
+          return;
+        }
+        game.unlocked.add(game.map);
+        resumeGame();
+        enterMap(target);
+      });
+      $("password-input").addEventListener("input", (event) => {
+        event.target.value = event.target.value
+          .replace(/[^0-9]/g, "")
+          .slice(0, 4);
+      });
+      const controlKeys = new Set([
+        "KeyW",
+        "KeyA",
+        "KeyS",
+        "KeyD",
+        "ArrowUp",
+        "ArrowLeft",
+        "ArrowDown",
+        "ArrowRight",
+        "ShiftLeft",
+        "ShiftRight",
+        "Space",
+        "KeyE",
+      ]);
+      const movementKeys = new Set([
+        "KeyW",
+        "KeyA",
+        "KeyS",
+        "KeyD",
+        "ArrowUp",
+        "ArrowLeft",
+        "ArrowDown",
+        "ArrowRight",
+      ]);
+      window.addEventListener("keydown", (event) => {
+        if (event.code === "Escape" && game.phase === "playing") {
+          event.preventDefault();
+          openMenu();
+          return;
+        }
+        const typing = event.target instanceof HTMLInputElement;
+        if (controlKeys.has(event.code) && !typing && game.phase !== "ready")
+          event.preventDefault();
+        if (game.phase !== "playing" || typing || !controlKeys.has(event.code))
+          return;
+        const fresh = !keys.has(event.code) && !event.repeat;
+        keys.add(event.code);
+        if (movementKeys.has(event.code) || event.code === "Space")
+          game.player.successUntil = 0;
+        if (event.code === "Space" && fresh && game.player.jumpTime === null) {
+          game.player.jumpStart = { x: game.player.x, y: game.player.y };
+          game.player.jumpTime = 0;
+        }
+        if (event.code === "KeyE" && fresh) interact();
+      });
+      window.addEventListener("keyup", (event) => {
+        if (controlKeys.has(event.code) && game.phase === "playing")
+          event.preventDefault();
+        keys.delete(event.code);
+      });
+      window.addEventListener("blur", () => {
+        clearInput();
+        openMenu();
+      });
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          clearInput();
+          openMenu();
+        }
+      });
+      $("play-button").addEventListener("click", () =>
+        game.phase === "ready" ? resetGame() : resumeGame(),
+      );
+      $("pause-button").addEventListener("click", openMenu);
+      $("menu-restart").addEventListener("click", resetGame);
+      $("retry-button").addEventListener("click", resetGame);
+      $("quiz-retry").addEventListener("click", showQuizChoices);
+      $("quiz-close").addEventListener("click", resumeGame);
+      $("password-close").addEventListener("click", resumeGame);
+      $("menu-dialog").addEventListener("cancel", (event) => {
+        event.preventDefault();
+        if (game.phase === "paused") resumeGame();
+      });
+      for (const id of ["quiz-dialog", "password-dialog"])
+        $(id).addEventListener("cancel", (event) => {
+          event.preventDefault();
+          resumeGame();
+        });
+      $("result-dialog").addEventListener("cancel", (event) =>
+        event.preventDefault(),
+      );
+      // ── 4. 충돌과 이동. 낮은 벤치는 점프 높이가 충분할 때만 통과. ──
+      function jumpLift() {
+        return game.player.jumpTime === null
+          ? 0
+          : Math.sin((Math.PI * game.player.jumpTime) / CONFIG.jumpDuration) *
+              CONFIG.jumpHeight;
+      }
+      function solids(forTeacher = false) {
+        return MAPS[game.map].obstacles.filter(
+          (o) =>
+            (o.door === undefined || !game.solved.has(o.door)) &&
+            (!o.low || forTeacher || jumpLift() < 14),
+        );
+      }
+      function circleRect(x, y, r, o) {
+        return (
+          Math.hypot(
+            x - Math.max(o.x, Math.min(x, o.x + o.w)),
+            y - Math.max(o.y, Math.min(y, o.y + o.h)),
+          ) < r
+        );
+      }
+      function blocked(x, y, r = CONFIG.playerRadius, forTeacher = false) {
+        const map = MAPS[game.map];
+        if (
+          x - r < 24 ||
+          x + r > map.width - 24 ||
+          y - r < 24 ||
+          y + r > map.height - 24
+        )
+          return true;
+        return solids(forTeacher).some((o) => circleRect(x, y, r, o));
+      }
+      function landPlayer() {
+        const p = game.player;
+        p.jumpTime = null;
+        // 벤치 위에서 멈췄다면 가장 가까운 안전한 가장자리로 착지. 공중에 계속 머물지 않습니다.
+        const obstacle = MAPS[game.map].obstacles.find(
+          (o) => o.low && circleRect(p.x, p.y, CONFIG.playerRadius, o),
+        );
+        if (!obstacle) return;
+        const r = CONFIG.playerRadius + 1,
+          candidates = [
+            { x: obstacle.x - r, y: p.y },
+            { x: obstacle.x + obstacle.w + r, y: p.y },
+            { x: p.x, y: obstacle.y - r },
+            { x: p.x, y: obstacle.y + obstacle.h + r },
+          ];
+        candidates.sort(
+          (a, b) =>
+            Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y),
+        );
+        const safe = candidates.find((v) => !blocked(v.x, v.y)) || p.jumpStart;
+        if (safe) Object.assign(p, safe);
+      }
+      function moveEntity(entity, dx, dy, speed, dt, r, teacher = false) {
+        let x = entity.x + dx * speed * dt,
+          y = entity.y + dy * speed * dt;
+        if (!blocked(x, entity.y, r, teacher)) entity.x = x;
+        if (!blocked(entity.x, y, r, teacher)) entity.y = y;
+      }
+      function segmentHitsRect(x1, y1, x2, y2, rect) {
+        let near = 0,
+          far = 1;
+        for (const [start, delta, min, max] of [
+          [x1, x2 - x1, rect.x, rect.x + rect.w],
+          [y1, y2 - y1, rect.y, rect.y + rect.h],
+        ]) {
+          if (Math.abs(delta) < 0.000001) {
+            if (start < min || start > max) return false;
+          } else {
+            const a = (min - start) / delta,
+              b = (max - start) / delta;
+            near = Math.max(near, Math.min(a, b));
+            far = Math.min(far, Math.max(a, b));
+            if (near > far) return false;
+          }
+        }
+        return true;
+      }
+      function lineClear(a, b, padding = 0) {
+        return !solids(true).some((o) =>
+          segmentHitsRect(a.x, a.y, b.x, b.y, {
+            x: o.x - padding,
+            y: o.y - padding,
+            w: o.w + padding * 2,
+            h: o.h + padding * 2,
+          }),
+        );
+      }
+      function teacherSeesPlayer() {
+        const t = game.teacher,
+          p = game.player;
+        return (
+          Math.hypot(t.x - p.x, t.y - p.y) <= CONFIG.detectionRadius &&
+          lineClear(t, p)
+        );
+      }
+      // 순찰/추격 모두 같은 충돌 규칙을 사용. 가려진 위치로 이동할 때는 작은 격자 BFS로 우회.
+      function findPath(from, to) {
+        if (lineClear(from, to, CONFIG.teacherRadius)) return [{ ...to }];
+        const cell = 24,
+          cols = Math.ceil((MAPS[game.map].width - 48) / 24),
+          rows = Math.ceil((MAPS[game.map].height - 48) / 24);
+        const grid = (p) => ({
+          x: Math.max(0, Math.min(cols - 1, Math.floor((p.x - 24) / cell))),
+          y: Math.max(0, Math.min(rows - 1, Math.floor((p.y - 24) / cell))),
+        });
+        const center = (p) => ({
+            x: 24 + p.x * cell + cell / 2,
+            y: 24 + p.y * cell + cell / 2,
+          }),
+          start = grid(from),
+          goal = grid(to),
+          id = (p) => p.y * cols + p.x;
+        const queue = [start],
+          visited = new Map([[id(start), null]]);
+        let reached = null;
+        for (let head = 0; head < queue.length; head++) {
+          const node = queue[head];
+          if (node.x === goal.x && node.y === goal.y) {
+            reached = node;
+            break;
+          }
+          for (const [dx, dy] of [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1],
+          ]) {
+            const next = { x: node.x + dx, y: node.y + dy };
+            if (
+              next.x < 0 ||
+              next.y < 0 ||
+              next.x >= cols ||
+              next.y >= rows ||
+              visited.has(id(next))
+            )
+              continue;
+            const pos = center(next);
+            if (blocked(pos.x, pos.y, CONFIG.teacherRadius, true)) continue;
+            visited.set(id(next), node);
+            queue.push(next);
+          }
+        }
+        if (!reached) return [];
+        const result = [];
+        for (
+          let node = reached;
+          visited.get(id(node)) !== null;
+          node = visited.get(id(node))
+        )
+          result.unshift(center(node));
+        return result;
+      }
+      function updateTeacher(dt) {
+        const t = game.teacher,
+          p = game.player;
+        if (game.elapsed - game.yardEnteredAt < 5) {
+          t.mode = "WAIT";
+          return;
+        }
+        if (t.mode === "WAIT") t.mode = "PATROL";
+        if (game.elapsed >= t.emotionUntil) t.emotion = "normal";
+        const seen = game.elapsed >= p.invincibleUntil && teacherSeesPlayer();
+        if (seen) {
+          if (t.mode !== "CHASE") {
+            t.path = [];
+            t.repath = 0;
+          }
+          t.mode = "CHASE";
+          t.lastSeen = { x: p.x, y: p.y };
+          t.emotion = "normal";
+        } else if (t.mode === "CHASE") {
+          t.mode = "SEARCH";
+          t.searchWait = 1.2;
+          t.emotion = "lost";
+          t.emotionUntil = game.elapsed + 2;
+          t.path = [];
+          t.repath = 0;
+        }
+        if (t.mode === "SEARCH" && game.elapsed >= t.emotionUntil) {
+          t.mode = "PATROL";
+          t.path = [];
+          t.repath = 0;
+        }
+        let goal =
+          t.mode === "CHASE"
+            ? p
+            : t.mode === "SEARCH"
+              ? t.lastSeen
+              : PATROL[t.waypoint];
+        if (!goal) {
+          t.mode = "PATROL";
+          goal = PATROL[t.waypoint];
+        }
+        const distance = Math.hypot(goal.x - t.x, goal.y - t.y);
+        if (
+          t.mode === "SEARCH" &&
+          (distance < 18 || (!t.path.length && t.repath > 0))
+        ) {
+          t.searchWait -= dt;
+          if (t.searchWait <= 0 && game.elapsed >= t.emotionUntil) {
+            t.mode = "PATROL";
+            t.path = [];
+            t.repath = 0;
+          }
+        }
+        if (t.mode === "PATROL" && distance < 10) {
+          t.waypoint = (t.waypoint + 1) % PATROL.length;
+          goal = PATROL[t.waypoint];
+          t.repath = 0;
+        }
+        t.repath -= dt;
+        if (t.repath <= 0) {
+          t.path = findPath(t, goal);
+          t.repath = 0.3;
+        }
+        const next = t.path[0];
+        if (next) {
+          const dx = next.x - t.x,
+            dy = next.y - t.y,
+            len = Math.hypot(dx, dy);
+          if (len < 5) t.path.shift();
+          else {
+            if (Math.abs(dx) > 1) t.facing = dx > 0 ? "right" : "left";
+            moveEntity(
+              t,
+              dx / len,
+              dy / len,
+              Math.min(CONFIG.walkSpeed, len / Math.max(dt, 0.001)),
+              dt,
+              CONFIG.teacherRadius,
+              true,
+            );
+          }
+        }
+        if (
+          Math.hypot(t.x - p.x, t.y - p.y) <=
+          CONFIG.teacherRadius + CONFIG.playerRadius
+        )
+          caught(performance.now() / 1000);
+      }
+      function update(dt, now) {
+        if (game.phase === "caught") {
+          if (game.elapsed - game.caughtAt >= CONFIG.caughtDuration) {
+            Object.assign(game.player, MAPS[game.map].spawn, {
+              jumpTime: null,
+              successUntil: 0,
+              invincibleUntil: game.elapsed + CONFIG.invincibleDuration,
+            });
+            Object.assign(game.teacher, {
+              mode: "PATROL",
+              lastSeen: null,
+              path: [],
+              repath: 0,
+            });
+            snapCamera();
+            game.phase = "playing";
+            say("다시 출발! 잠깐 동안 선생님에게 들키지 않아요.");
+          }
+          resolveState(now);
+          return;
+        }
+        if (game.phase !== "playing") {
+          resolveState(now);
+          return;
+        }
+        const p = game.player;
+        let dx =
+            Number(keys.has("KeyD") || keys.has("ArrowRight")) -
+            Number(keys.has("KeyA") || keys.has("ArrowLeft")),
+          dy =
+            Number(keys.has("KeyS") || keys.has("ArrowDown")) -
+            Number(keys.has("KeyW") || keys.has("ArrowUp"));
+        const len = Math.hypot(dx, dy);
+        p.moving = len > 0;
+        if (p.exhausted && p.stamina >= 0.8) p.exhausted = false;
+        p.running =
+          p.moving &&
+          (keys.has("ShiftLeft") || keys.has("ShiftRight")) &&
+          !p.exhausted &&
+          p.stamina > 0;
+        p.stamina = Math.max(
+          0,
+          Math.min(CONFIG.staminaMax, p.stamina + (p.running ? -1 : 0.8) * dt),
+        );
+        if (p.stamina === 0) p.exhausted = true;
+        if (p.jumpTime !== null) {
+          p.jumpTime += dt;
+          if (p.jumpTime >= CONFIG.jumpDuration) landPlayer();
+        }
+        if (len) {
+          dx /= len;
+          dy /= len;
+          p.facing =
+            dx !== 0 ? (dx > 0 ? "right" : "left") : dy > 0 ? "down" : "up";
+          moveEntity(
+            p,
+            dx,
+            dy,
+            p.running ? CONFIG.runSpeed : CONFIG.walkSpeed,
+            dt,
+            CONFIG.playerRadius,
+          );
+        }
+        if (game.map === "yard") updateTeacher(dt);
+        resolveState(now);
+      }
+      // ── 5. 원본 PNG 렌더링. 비율을 유지하며 위치 변화/반전만 사용 ──
+      function readyImage(image) {
+        return image && image.complete && image.naturalWidth > 0;
+      }
+      function spriteFrame() {
+        const p = game.player;
+        const name =
+          p.state === STATES.CAUGHT
+            ? "caught"
+            : p.state === STATES.JUMP
+              ? "jump"
+              : p.state === STATES.QUIZ_SUCCESS
+                ? "success"
+                : p.state === STATES.MOVE
+                  ? "walk"
+                  : "idle";
+        return readyImage(playerImages[name]) ? playerImages[name] : null;
+      }
+      function teacherFrame() {
+        const name =
+          game.teacher.emotion === "caught"
+            ? "caught"
+            : game.teacher.emotion === "lost"
+              ? "lost"
+              : "patrol";
+        return readyImage(teacherImages[name]) ? teacherImages[name] : null;
+      }
+      function drawFrame(image, height) {
+        const width = (height * image.naturalWidth) / image.naturalHeight;
+        ctx.drawImage(image, -width / 2, -height, width, height);
+      }
+      function box(x, y, w, h, color, radius = 0) {
+        ctx.fillStyle = color;
+        x = Math.round(x);
+        y = Math.round(y);
+        w = Math.round(w);
+        h = Math.round(h);
+        if (radius >= 4 && w > 8 && h > 8) {
+          ctx.fillRect(x + 2, y, w - 4, h);
+          ctx.fillRect(x, y + 2, w, h - 4);
+        } else ctx.fillRect(x, y, w, h);
+      }
+      function text(value, x, y, size = 14, color = "#334f58", align = "left") {
+        ctx.fillStyle = color;
+        ctx.font = `700 ${size}px "Malgun Gothic",system-ui,sans-serif`;
+        ctx.textAlign = align;
+        ctx.fillText(value, x, y);
+      }
+      function ellipse(x, y, rx, ry, color) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      function snapCamera() {
+        const map = MAPS[game.map];
+        game.camera.x = Math.max(
+          0,
+          Math.min(map.width - CONFIG.width, game.player.x - CONFIG.width / 2),
+        );
+        game.camera.y = Math.max(
+          0,
+          Math.min(
+            map.height - CONFIG.height,
+            game.player.y - CONFIG.height / 2,
+          ),
+        );
+      }
+      function updateCamera(dt) {
+        const map = MAPS[game.map],
+          p = game.player,
+          targetX = Math.max(
+            0,
+            Math.min(map.width - CONFIG.width, p.x - CONFIG.width / 2),
+          ),
+          targetY = Math.max(
+            0,
+            Math.min(map.height - CONFIG.height, p.y - CONFIG.height / 2),
+          );
+        const a = 1 - Math.exp(-9 * dt);
+        game.camera.x += (targetX - game.camera.x) * a;
+        game.camera.y += (targetY - game.camera.y) * a;
+      }
+      function garland(x, y, w) {
+        ctx.strokeStyle = "#135b42";
+        ctx.lineWidth = 14;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        for (let xx = x; xx <= x + w; xx += 12)
+          ctx.lineTo(xx, y + Math.sin((xx - x) / 65) * 9);
+        ctx.stroke();
+        for (let xx = x + 12, i = 0; xx < x + w; xx += 35, i++) {
+          ellipse(
+            xx,
+            y + Math.sin((xx - x) / 65) * 9 + 8,
+            4,
+            6,
+            ["#ffdb68", "#f48080", "#8ed9f1"][i % 3],
+          );
+        }
+      }
+      function wreath(x, y, r = 17) {
+        ctx.strokeStyle = "#24724c";
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.stroke();
+        ellipse(x - 6, y - r + 1, 8, 5, "#c84350");
+        ellipse(x + 6, y - r + 1, 8, 5, "#c84350");
+        ellipse(x + 3, y + r, 3, 3, "#ffdf74");
+      }
+      function christmasTree(o) {
+        const x = o.x,
+          y = o.y,
+          w = o.w,
+          h = o.h;
+        box(x + w * 0.44, y + h * 0.72, w * 0.13, h * 0.28, "#7d5a4b");
+        for (let i = 0; i < 3; i++) {
+          const cy = y + i * h * 0.19;
+          ctx.fillStyle = ["#206b4c", "#287e59", "#318e67"][i];
+          ctx.beginPath();
+          ctx.moveTo(x + w / 2, cy);
+          ctx.lineTo(x + w * (0.03 + i * 0.02), cy + h * 0.53);
+          ctx.lineTo(x + w * (0.97 - i * 0.02), cy + h * 0.53);
+          ctx.closePath();
+          ctx.fill();
+          box(x + w * 0.2, cy + h * 0.4, w * 0.6, 5, "#f6fbff", 4);
+        }
+        for (const [dx, dy, c] of [
+          [0.38, 0.36, "#f5ca58"],
+          [0.64, 0.52, "#ef7180"],
+          [0.34, 0.65, "#a9e0f0"],
+          [0.65, 0.76, "#f5ca58"],
+        ])
+          ellipse(x + w * dx, y + h * dy, 4, 4, c);
+        text("✦", x + w / 2, y + 4, 19, "#ffe28b", "center");
+      }
+      function floorTiles(map) {
+        box(0, 0, map.width, map.height, "#d9e7e9");
+        box(32, 32, map.width - 64, map.height - 64, "#ead2bb");
+        ctx.strokeStyle = "#d5b8a1";
+        ctx.lineWidth = 1;
+        for (let x = 32; x < map.width; x += CONFIG.tileSize) {
+          ctx.beginPath();
+          ctx.moveTo(x, 32);
+          ctx.lineTo(x, map.height - 32);
+          ctx.stroke();
+        }
+        for (let y = 32; y < map.height; y += CONFIG.tileSize) {
+          ctx.beginPath();
+          ctx.moveTo(32, y);
+          ctx.lineTo(map.width - 32, y);
+          ctx.stroke();
+        }
+        box(30, 574, map.width - 60, 198, "#efd9c9");
+        text("복도", 880, 690, 23, "#c5a997", "center");
+      }
+      function furniture(o) {
+        const { x, y, w, h, kind } = o;
+        box(x + 3, y + 6, w, h, "#27425520", 3);
+        if (kind === "tree") {
+          christmasTree(o);
+          return;
+        }
+        if (kind === "wall") {
+          box(x, y, w, h, "#c39570");
+          box(x, y, w, 5, "#f6e4c9");
+          return;
+        }
+        if (kind === "door") {
+          if (!game.solved.has(o.door)) {
+            box(x, y, w, h, "#467e70");
+            box(x + 7, y + 4, w - 14, 4, "#d0e5cd");
+          } else box(x, y, w, h, "#eff1dc");
+          return;
+        }
+        if (kind === "piano") {
+          box(x, y, w, h, "#263642", 14);
+          box(x + 12, y + 12, w - 24, 65, "#445564", 12);
+          for (let i = 0; i < 13; i++) {
+            box(x + 8 + i * 11, y + h - 44, 10, 36, "#fff9e6");
+            if (i % 3 !== 0) box(x + 14 + i * 11, y + h - 44, 6, 20, "#18242e");
+          }
+          return;
+        }
+        if (kind === "instruments") {
+          box(x, y, w, h, "#9d603e");
+          box(x + 6, y + 6, w - 12, h - 12, "#d9a96b");
+          for (let i = 0; i < 3; i++) {
+            const xx = x + 17 + i * 24;
+            box(xx, y + 15, 5, 50, "#8e5c39");
+            ellipse(xx + 2, y + 65, 10, 16, "#b77c48");
+            box(xx - 1, y + 65, 6, 6, "#573b2e");
+          }
+          text("악기", x + w / 2, y + h - 9, 11, "#684733", "center");
+          return;
+        }
+        if (kind === "keypad") {
+          box(x, y, w, h, "#435a70");
+          box(x + 5, y + 5, w - 10, 14, "#bfeab6");
+          for (let row = 0; row < 3; row++)
+            for (let col = 0; col < 3; col++)
+              box(x + 7 + col * 10, y + 26 + row * 8, 6, 5, "#e7eef0");
+          return;
+        }
+        if (kind === "score") {
+          box(x + w / 2 - 3, y + 16, 6, h - 12, "#57626b");
+          box(x, y, w, 25, "#fff9e8", 2);
+          for (let i = 0; i < 4; i++)
+            box(x + 5, y + 5 + i * 4, w - 10, 1, "#a0a4a4");
+          ellipse(x + 13, y + 13, 3, 3, "#42515b");
+          return;
+        }
+        if (kind === "instrument") {
+          box(x + w / 2 - 4, y, 8, h * 0.6, "#bd915f");
+          ellipse(x + w / 2, y + h * 0.7, w / 2, h * 0.29, "#cb8654");
+          ellipse(x + w / 2, y + h * 0.68, 5, 5, "#574436");
+          return;
+        }
+        if (kind === "board") {
+          box(x, y, w, h, "#285e4c");
+          box(x + 8, y + 6, w - 16, 2, "#c6e1bc");
+          return;
+        }
+        if (kind === "desk" || kind === "office") {
+          box(x, y, w, h - 15, "#bb854f", 4);
+          box(x + 4, y + 4, w - 8, h - 25, "#e8ba7c", 3);
+          box(x + w * 0.3, y + h - 13, w * 0.4, 13, "#487d6c", 3);
+          box(x + 12, y + 15, 27, 18, "#fff8df");
+          if (kind === "office") {
+            box(x + w - 64, y + 12, 50, 30, "#3e5d69", 3);
+            box(x + w - 59, y + 17, 40, 19, "#83c7dc");
+            box(x + w - 52, y + 46, 30, 6, "#d9e2db");
+          }
+          return;
+        }
+        if (kind === "sink") {
+          box(x, y, w, h, "#98bfc8", 4);
+          box(x + 7, y + 9, w - 14, h - 19, "#f8fbff", 5);
+          box(x + w / 2 - 4, y + 4, 8, 18, "#7a9fa9");
+          return;
+        }
+        if (kind === "stall") {
+          box(x, y, w, h, "#c4d6da");
+          box(x + 4, y + 4, w - 8, h - 20, "#eef6fa");
+          ellipse(x + w / 2, y + h * 0.5, 17, 25, "#fff");
+          box(x, y + h - 14, w, 14, "#9cbcc4");
+          box(x + w - 16, y + h - 10, 6, 6, "#597c83");
+          return;
+        }
+        if (kind === "books" || kind === "files") {
+          box(x, y, w, h, "#aa7c4d");
+          for (let xx = x + 8, i = 0; xx < x + w - 7; xx += 11, i++)
+            box(xx, y + 8, 8, h - 15, ["#b9585d", "#77a8a2", "#efcb77"][i % 3]);
+          return;
+        }
+        if (kind === "treadmill") {
+          box(x, y, w, h, "#687c8c", 5);
+          box(x + 13, y + 30, w - 26, h - 42, "#293d4d");
+          box(x + 10, y + 8, w - 20, 20, "#a2d1d8");
+          for (let yy = y + 42; yy < y + h - 16; yy += 14)
+            box(x + 20, yy, w - 40, 2, "#496071");
+          return;
+        }
+        if (kind === "weights") {
+          box(x, y, w, h, "#bdc8d1", 4);
+          for (let i = 0; i < 3; i++) {
+            box(x + 15 + i * 30, y + 22, 25, 6, "#556b78");
+            box(x + 14 + i * 30, y + 12, 7, 26, "#344c5c");
+            box(x + 33 + i * 30, y + 12, 7, 26, "#344c5c");
+          }
+          return;
+        }
+        if (kind === "mat") {
+          box(x, y, w, h, "#c47db3", 7);
+          box(x + 7, y + 7, w - 14, h - 14, "#e0afd5", 4);
+          return;
+        }
+        if (kind === "lab") {
+          box(x, y, w, h, "#688f9c", 5);
+          box(x + 5, y + 5, w - 10, h - 16, "#d7ebea", 3);
+          for (let i = 0; i < 3; i++) {
+            box(x + 23 + i * 45, y + 20, 20, 38, "#f7fcff", 3);
+            box(
+              x + 25 + i * 45,
+              y + 39,
+              16,
+              16,
+              ["#8abfd5", "#e899aa", "#a8c98a"][i],
+            );
+          }
+          return;
+        }
+        if (kind === "model") {
+          box(x + w / 2 - 3, y, 6, h, "#c7b49f");
+          ellipse(x + w / 2, y + 15, 13, 16, "#fcf5de");
+          box(x + 4, y + 38, w - 8, 44, "#ede4cc", 7);
+          for (let i = 0; i < 4; i++)
+            box(x + 8, y + 43 + i * 8, w - 16, 2, "#b6aa96");
+          return;
+        }
+        if (kind === "shelf") {
+          box(x, y, w, h, "#a47b54", 3);
+          for (let row = 0; row < 3; row++) {
+            box(x + 5, y + row * 42 + 38, w - 10, 6, "#edd0a0");
+            for (let col = 0; col < 4; col++)
+              box(
+                x + 10 + col * 23,
+                y + row * 42 + 8,
+                15,
+                25,
+                ["#e77c82", "#e9c65f", "#82b697", "#a39acc"][(row + col) % 4],
+                2,
+              );
+          }
+          return;
+        }
+        if (kind === "fridge") {
+          box(x, y, w, h, "#a5c9d6", 5);
+          box(x + 8, y + 9, w - 16, h - 22, "#dceff4", 2);
+          for (let i = 0; i < 4; i++)
+            box(x + 13, y + 25 + i * 32, w - 26, 3, "#94b4c5");
+          box(x + w - 13, y + h * 0.45, 5, 26, "#597e8c");
+          return;
+        }
+        if (kind === "counter") {
+          box(x, y, w, h, "#c48455", 4);
+          box(x + 4, y + 4, w - 8, h - 13, "#efc597");
+          box(x + w - 65, y + 10, 49, 28, "#3c6161", 4);
+          box(x + w - 60, y + 13, 39, 18, "#a9e0dc");
+          return;
+        }
+        if (kind === "bench") {
+          box(x, y, w, h, "#bb814e", 4);
+          box(x + 5, y + 5, w - 10, 6, "#e0b480");
+          box(x + 5, y + h - 8, w - 10, 4, "#f4e1c6");
+          return;
+        }
+        if (kind === "goal") {
+          box(x, y, w, h, "#fafcff");
+          ctx.strokeStyle = "#8bb6c1";
+          ctx.lineWidth = 1;
+          for (let yy = y + 8; yy < y + h; yy += 12) {
+            ctx.beginPath();
+            ctx.moveTo(x + 4, yy);
+            ctx.lineTo(x + w - 4, yy);
+            ctx.stroke();
+          }
+          return;
+        }
+        if (kind === "building") {
+          // 위에서 본 눈 덮인 지붕. 충돌 사각형과 건물 외곽이 일치합니다.
+          box(x, y, w, h, "#4c718b");
+          box(x + 8, y + 8, w - 16, h - 16, "#6b95ae");
+          for (let yy = y + 24; yy < y + h - 15; yy += CONFIG.tileSize)
+            for (let xx = x + 18; xx < x + w - 12; xx += CONFIG.tileSize) {
+              box(xx, yy, 23, 2, "#92b7c8");
+            }
+          box(x + 8, y + 8, w - 16, 14, "#f5fbff");
+          box(x + 8, y + h - 22, w - 16, 14, "#edf8fd");
+          box(x + w / 2 - 3, y + 20, 6, h - 42, "#b4d2dc");
+          box(x + w / 2 - 70, y + h / 2 - 21, 140, 42, "#fff2cd", 4);
+          text(o.label, x + w / 2, y + h / 2 + 7, 23, "#3b6172", "center");
+          box(x + w / 2 - 34, y + h - 18, 68, 18, "#3c796c");
+          wreath(x + w / 2, y + h - 9, 13);
+          return;
+        }
+      }
+      function drawSchool(now) {
+        const map = MAPS[game.map];
+        floorTiles(map);
+        for (const room of map.rooms) {
+          box(
+            room.x + 16,
+            room.y + 16,
+            room.w - 32,
+            room.h - 32,
+            room.theme === "toilet" ? "#daeaf0" : "#e3c797",
+          );
+          ctx.strokeStyle = "#cdb18b";
+          ctx.lineWidth = 1;
+          for (
+            let yy = room.y + 30;
+            yy < room.y + room.h - 16;
+            yy += CONFIG.tileSize
+          ) {
+            ctx.beginPath();
+            ctx.moveTo(room.x + 16, yy);
+            ctx.lineTo(room.x + room.w - 16, yy);
+            ctx.stroke();
+          }
+          box(room.x + room.w / 2 - 110, room.y + 28, 220, 35, "#fff8df", 6);
+          text(
+            room.name,
+            room.x + room.w / 2,
+            room.y + 52,
+            19,
+            "#3a5b56",
+            "center",
+          );
+          garland(room.x + 15, room.y + 8, room.w - 30);
+          const object = map.objects.find((o) => o.label === room.name);
+          if (object && room.quizId !== undefined) {
+            box(
+              object.x - 40,
+              object.y - 16,
+              80,
+              28,
+              game.solved.has(room.quizId) ? "#d9eecf" : "#fff3d0",
+              5,
+            );
+            text(
+              game.solved.has(room.quizId)
+                ? "✓ 완료"
+                : `${ORDINALS[QUIZZES[room.quizId].slot]}`,
+              object.x,
+              object.y + 3,
+              13,
+              "#47735c",
+              "center",
+            );
+          }
+        }
+        for (const o of map.obstacles) furniture(o);
+        box(62, 626, 136, 112, "#9aafc0", 4);
+        for (let j = 0; j < 7; j++) box(70, 635 + j * 13, 120, 6, "#e2eced");
+        text(
+          game.map === "2" ? "1층 ↓" : "2층 ↑",
+          130,
+          773,
+          18,
+          "#527e8f",
+          "center",
+        );
+        if (game.map === "1") {
+          box(812, 1340, 136, 58, "#538c82", 5);
+          box(820, 1348, 120, 44, "#b9e0dd", 3);
+          box(877, 1348, 5, 44, "#538c82");
+          text("중앙 출입구", 880, 1319, 19, "#53826f", "center");
+        }
+        // 빈 공간에만 장식. 경로를 가리지 않는 벽면 리스와 조명.
+        for (let x = 260; x < map.width - 100; x += 280) {
+          wreath(x, 62, 16);
+          ellipse(x, 48, 4, 4, "#f0cb67");
+        }
+      }
+      function drawYard(now) {
+        const map = MAPS.yard;
+        box(0, 0, map.width, map.height, "#d5e8f1");
+        box(90, 100, 130, 1475, "#f2dfc6", 35);
+        box(1360, 90, 160, 1510, "#e5bca8", 40);
+        box(1440, 465, 300, 80, "#e5bca8", 8);
+        box(1440, 840, 290, 64, "#e5bca8", 8);
+        box(120, 1465, 1740, 130, "#f0d4b9", 35);
+        box(205, 260, 1180, 900, "#da8595", 180);
+        for (let i = 0; i < 4; i++) {
+          ctx.strokeStyle = "#fbe5e3";
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.roundRect(
+            220 + i * 17,
+            275 + i * 17,
+            1150 - i * 34,
+            870 - i * 34,
+            170 - i * 12,
+          );
+          ctx.stroke();
+        }
+        box(300, 350, 980, 700, "#36825d", 30);
+        ctx.strokeStyle = "#d8efd5";
+        ctx.lineWidth = 4;
+        ctx.strokeRect(335, 383, 910, 635);
+        ctx.beginPath();
+        ctx.moveTo(790, 383);
+        ctx.lineTo(790, 1018);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(790, 700, 100, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.strokeRect(335, 535, 150, 320);
+        ctx.strokeRect(1095, 535, 150, 320);
+        ellipse(660, 820, 14, 14, "#fffdf2");
+        ellipse(660, 820, 6, 6, "#364653");
+        text("눈빛 운동장", 790, 470, 25, "#b6d7b1", "center");
+        box(80, 80, 250, 80, "#6596a3", 4);
+        box(70, 58, 270, 35, "#f6fbff", 10);
+        text("학교 출입구", 205, 129, 22, "#edf8fa", "center");
+        for (const o of map.obstacles) furniture(o);
+        // 정문을 실제 객체와 같은 위치에 표시합니다.
+        box(800, 1560, 280, 68, "#6e8da3");
+        box(780, 1533, 42, 115, "#bb8d72");
+        box(1058, 1533, 42, 115, "#bb8d72");
+        box(774, 1522, 55, 20, "#f9fcff", 6);
+        box(1050, 1522, 55, 20, "#f9fcff", 6);
+        for (let x = 830; x < 1050; x += 17) box(x, 1570, 5, 57, "#dbe7ed");
+        wreath(940, 1573, 22);
+        text("학교 정문 · 관리실에서 해제", 940, 1517, 22, "#4a6c79", "center");
+        for (let x = 350; x < 1300; x += 210) {
+          box(x, 120, 160, 54, "#9cb6c7", 4);
+          for (let j = 0; j < 3; j++)
+            box(x + 4, 125 + j * 14, 152, 6, "#f7fbff");
+        }
+        for (let i = 0; i < 65; i++) {
+          const x = (i * 367 + 31) % map.width,
+            y = (i * 173 + now * 7) % map.height;
+          ellipse(x, y, 2, 2, "#ffffffb0");
+        }
+        const t = game.teacher;
+        if (game.elapsed - game.yardEnteredAt >= 5) {
+          ctx.fillStyle = t.mode === "CHASE" ? "#e8807c22" : "#eccc7720";
+          ctx.beginPath();
+          ctx.arc(t.x, t.y, CONFIG.detectionRadius, 0, Math.PI * 2);
+          ctx.fill();
+        } else
+          text(
+            `순찰까지 ${Math.max(0, Math.ceil(5 - (game.elapsed - game.yardEnteredAt)))}초`,
+            t.x,
+            t.y - 90,
+            17,
+            "#806b5a",
+            "center",
+          );
+        drawTeacher(now);
+      }
+      function drawManagement(now) {
+        const map = MAPS.management;
+        floorTiles(map);
+        box(96, 96, 808, 608, "#e6c58f");
+        for (let y = 112; y < 704; y += CONFIG.tileSize) {
+          box(96, y, 808, 1, "#cfb080");
+        }
+        box(365, 116, 270, 43, "#fff3ce", 4);
+        text("관리실 · 마지막 탈출", 500, 146, 23, "#3d695f", "center");
+        garland(100, 92, 800);
+        for (const obstacle of map.obstacles) furniture(obstacle);
+        box(898, 372, 18, 100, "#2b6e66");
+        box(900, 380, 10, 84, "#8ab9a7");
+        text("탈출문", 860, 345, 18, "#336f61", "center");
+        text("E · 1층 비밀번호", 817, 464, 14, "#4a7668", "center");
+        box(456, 704, 88, 16, "#a6c4cf");
+        text("운동장 ↓", 500, 754, 18, "#587b8b", "center");
+      }
+      function drawTeacher(now) {
+        const t = game.teacher,
+          image = teacherFrame();
+        if (!image) return;
+        ellipse(t.x, t.y + 3, 22, 8, "#38576c33");
+        ctx.save();
+        ctx.translate(t.x, t.y);
+        if (ASSET_PATHS.teacherFacesLeft && t.facing === "right")
+          ctx.scale(-1, 1);
+        ctx.imageSmoothingEnabled = true;
+        drawFrame(image, 66);
+        ctx.restore();
+        text(
+          t.emotion === "caught"
+            ? "잡았다!"
+            : t.emotion === "lost"
+              ? "어디 갔지?"
+              : "라코 선생님",
+          t.x,
+          t.y - 78,
+          14,
+          "#8c4f56",
+          "center",
+        );
+      }
+      function drawPlayer(now) {
+        const p = game.player,
+          image = spriteFrame();
+        if (!image) return;
+        const lift = jumpLift(),
+          bob = p.moving ? Math.sin(now * (p.running ? 18 : 12)) * 1.5 : 0;
+        ellipse(p.x, p.y + 3, Math.max(9, 18 - lift / 8), 7, "#38576c33");
+        ctx.save();
+        ctx.translate(p.x, p.y - lift - bob);
+        if (
+          p.facing === "left" &&
+          (p.state === STATES.MOVE || p.state === STATES.JUMP)
+        )
+          ctx.scale(-1, 1);
+        ctx.imageSmoothingEnabled = true;
+        drawFrame(image, 62);
+        ctx.restore();
+      }
+      function drawMiniMap() {
+        const map = MAPS[game.map],
+          w = 188,
+          h = (map.height / map.width) * w,
+          x = CONFIG.width - w - 14,
+          y = 14,
+          scale = w / map.width;
+        ctx.save();
+        box(x - 7, y - 7, w + 14, h + 14, "#f6fbfff0", 10);
+        ctx.translate(x, y);
+        ctx.scale(scale, scale);
+        box(
+          0,
+          0,
+          map.width,
+          map.height,
+          game.map === "yard" ? "#cce2df" : "#eadac7",
+        );
+        for (const o of map.obstacles)
+          box(o.x, o.y, o.w, o.h, o.kind === "wall" ? "#b08d6d" : "#81a99a");
+        for (const o of map.objects) {
+          const complete = o.type === "quiz" && game.solved.has(o.quizId);
+          ellipse(
+            o.x,
+            o.y,
+            65,
+            65,
+            complete ? "#8fa780" : o.type === "quiz" ? "#fff4bf" : "#8cbdce",
+          );
+          if (o.type === "quiz")
+            text(
+              String(QUIZZES[o.quizId].slot + 1),
+              o.x,
+              o.y + 12,
+              120,
+              "#385d56",
+              "center",
+            );
+        }
+        ellipse(game.player.x, game.player.y, 35, 35, "#c9445a");
+        ctx.lineWidth = 10;
+        ctx.strokeStyle = "#52778c";
+        ctx.strokeRect(
+          game.camera.x,
+          game.camera.y,
+          CONFIG.width,
+          CONFIG.height,
+        );
+        ctx.restore();
+        text(
+          "안내도 · 숫자는 퀴즈 순서",
+          x + w / 2,
+          y + h + 22,
+          10,
+          "#507078",
+          "center",
+        );
+      }
+      function drawMap(now) {
+        ctx.imageSmoothingEnabled = false;
+        ctx.clearRect(0, 0, CONFIG.width, CONFIG.height);
+        ctx.save();
+        ctx.translate(-Math.round(game.camera.x), -Math.round(game.camera.y));
+        if (game.map === "yard") drawYard(now);
+        else if (game.map === "management") drawManagement(now);
+        else drawSchool(now);
+        const map = MAPS[game.map];
+        for (const [x, y, w, h] of [
+          [8, 8, map.width - 16, 16],
+          [8, map.height - 24, map.width - 16, 16],
+          [8, 8, 16, map.height - 16],
+          [map.width - 24, 8, 16, map.height - 16],
+        ])
+          box(x, y, w, h, "#6f9eae");
+        ctx.save();
+        if (game.elapsed < game.player.invincibleUntil)
+          ctx.globalAlpha = Math.sin(now * 22) > 0.1 ? 0.4 : 1;
+        drawPlayer(now);
+        ctx.restore();
+        const target = game.phase === "playing" ? nearestObject() : null;
+        if (target) {
+          box(target.x - 33, target.y + 22, 66, 27, "#fff9e9", 4);
+          text("[E] 확인", target.x, target.y + 41, 12, "#367458", "center");
+        }
+        ctx.restore();
+        if (game.map !== "management") drawMiniMap();
+        if (game.phase === "caught") {
+          ctx.fillStyle = "#dd858c22";
+          ctx.fillRect(0, 0, CONFIG.width, CONFIG.height);
+          text(
+            "선생님에게 걸렸다!",
+            CONFIG.width / 2,
+            CONFIG.height / 2,
+            29,
+            "#b64c64",
+            "center",
+          );
+        }
+      }
+      function updateUI(now) {
+        const popup = $("success-popup");
+        popup.hidden = now >= game.successPopupUntil;
+        $("success-digit").textContent =
+          `비밀번호 숫자: ${game.successDigit ?? ""}`;
+        for (const floor of ["2", "1"])
+          $("bottom-code-" + floor).textContent = QUIZZES.filter(
+            (q) => q.floor === floor,
+          )
+            .map((q) => (game.solved.has(q.id) ? q.digit : "?"))
+            .join(" ");
+        const remaining = Math.max(
+          0,
+          Math.ceil(CONFIG.duration - game.elapsed),
+        );
+        $("time-value").textContent =
+          `${String(Math.floor(remaining / 60)).padStart(2, "0")}:${String(remaining % 60).padStart(2, "0")}`;
+        $("time-value").classList.toggle("urgent", remaining <= 20);
+        $("hearts").textContent =
+          "♥".repeat(game.hearts) + "♡".repeat(3 - game.hearts);
+        $("hearts").setAttribute("aria-label", `하트 ${game.hearts}개`);
+        $("caught-count").textContent = game.caughtCount + "회";
+        for (const floor of ["2", "1"])
+          $("code-" + floor).textContent = QUIZZES.filter(
+            (q) => q.floor === floor,
+          )
+            .map((q) => (game.solved.has(q.id) ? q.digit : "?"))
+            .join(" ");
+        const floorNames = {
+          2: "2층 · 과학 퀴즈와 계단",
+          1: "1층 · 정문을 향해",
+          yard: "운동장 · 오른쪽 관리실을 향해",
+          management: "관리실 · 마지막 비밀번호",
+        };
+        $("floor-label").textContent = floorNames[game.map];
+        $("map-detail").textContent =
+          game.map === "yard"
+            ? "오른쪽 관리실 출입문에서 E"
+            : game.map === "management"
+              ? "탈출문에서 E · 1층 비밀번호"
+              : `퀴즈 ${QUIZZES.filter((q) => q.floor === game.map && game.solved.has(q.id)).length} / 4`;
+        for (const id of ["2", "1", "yard", "management"]) {
+          $("route-" + id).classList.toggle("active", game.map === id);
+          $("route-" + id).classList.toggle(
+            "done",
+            id === "2"
+              ? game.unlocked.has("2")
+              : id === "1"
+                ? game.unlocked.has("1")
+                : id === "yard"
+                  ? game.map === "management" || game.phase === "escaped"
+                  : game.phase === "escaped",
+          );
+        }
+        $("state-label").textContent = game.player.state;
+        $("ai-label").textContent =
+          game.map !== "yard"
+            ? "운동장에서 대기"
+            : {
+                WAIT: "대기",
+                PATROL: "순찰",
+                CHASE: "추격",
+                SEARCH: "마지막 위치 확인",
+                RECOVER: "잡음",
+              }[game.teacher.mode];
+        $("stamina-bar").style.width =
+          `${(game.player.stamina / CONFIG.staminaMax) * 100}%`;
+        $("stamina-meter").setAttribute(
+          "aria-valuenow",
+          game.player.stamina.toFixed(1),
+        );
+        $("pause-button").disabled = game.phase !== "playing";
+        const target = nearestObject();
+        $("hint").textContent =
+          now < game.messageUntil
+            ? game.message
+            : game.phase === "ready"
+              ? "시작 버튼을 누르면 90초 타이머가 시작됩니다."
+              : target
+                ? target.type === "quiz"
+                  ? game.solved.has(target.quizId)
+                    ? "완료한 방입니다. 다른 방의 숫자도 모아 보세요."
+                    : `${target.label} · E키를 눌러 과학 퀴즈 풀기`
+                  : `${target.label} · E키로 상호작용`
+                : game.map === "yard"
+                  ? "오른쪽 보행로를 따라 관리실 출입문으로 가세요."
+                  : game.map === "management"
+                    ? "오른쪽 탈출문에서 E를 누르고 1층의 비밀번호를 입력하세요."
+                    : "각 방 문 앞에서 E를 눌러 비밀번호 숫자 4개를 모으세요.";
+      }
+      function frame(timestamp) {
+        const now = timestamp / 1000,
+          delta = game.lastFrame
+            ? Math.max(0, (timestamp - game.lastFrame) / 1000)
+            : 0;
+        game.lastFrame = timestamp;
+        // 타이머는 FPS와 무관한 실제 경과 시간. 퀴즈/비밀번호/잡힘 중에도 흐르고 메뉴에서만 정지.
+        if (["playing", "quiz", "password", "caught"].includes(game.phase)) {
+          game.elapsed = Math.min(CONFIG.duration, game.elapsed + delta);
+          if (game.elapsed >= CONFIG.duration) finish("failed");
+        }
+        // 물리는 최대 0.25초만 처리하고 1/120초 단위로 나눠 벽을 뚫지 않게 합니다.
+        let remaining = Math.min(delta, 0.25);
+        while (remaining > 0) {
+          const dt = Math.min(remaining, 1 / 120);
+          update(dt, now);
+          remaining -= dt;
+        }
+        updateCamera(Math.min(delta, 0.25));
+        drawMap(now);
+        updateUI(now);
+        requestAnimationFrame(frame);
+      }
+      $("menu-dialog").showModal();
+      requestAnimationFrame(frame);
+    </script>
+  </body>
+</html>
